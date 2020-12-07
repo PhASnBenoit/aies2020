@@ -1,0 +1,420 @@
+#include "cbdd.h"
+
+CBdd::CBdd()
+{
+    conf = new CConfig();
+    SERVEUR = conf->getBddHostname();
+    QString databaseType = conf->getBddType();
+    QString databaseHostname = conf->getBddHostname();
+    QString databaseName = conf->getBddName();
+    QString databaseUsername = conf->getBddUsername();
+    QString databasePassword = conf->getBddPassword();
+qDebug() << databaseType;
+qDebug() << databaseName;
+qDebug() << databaseHostname;
+    Aies_bdd = QSqlDatabase::addDatabase(databaseType);
+    Aies_bdd.setDatabaseName(databaseName);
+    Aies_bdd.setHostName(databaseHostname);
+    Aies_bdd.setUserName(databaseUsername);
+    Aies_bdd.setPassword(databasePassword);
+    if(!Aies_bdd.open())
+    {
+        qDebug("[CBdd::CBdd]: BDD non ouverte");
+        exit(1);
+    }
+}
+
+CBdd::~CBdd()
+{
+    delete conf;
+    Aies_bdd.close();
+}
+
+QString CBdd::getNoZone(QString mac)
+{
+    QString NoZone = "NoZoneEmpty";
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getNoZone]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT zone_id FROM pas WHERE mac = '"+mac+"'");
+        Aies_query.next();
+        NoZone = Aies_query.value(0).toString();
+//        qDebug() << "NoZone: " << NoZone;
+        return NoZone;
+    }
+}
+
+QString CBdd::getNomZone(int NoZone)
+{
+    QString NomZone = "NomZoneEmpty";
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getNomZone]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT zones FROM zones WHERE idzone='"+QString::number(NoZone)+"'");
+        Aies_query.next();
+        NomZone = Aies_query.value(0).toString();
+        qDebug() << "NomZone: " << NomZone;
+        return NomZone;
+    }
+}
+
+QString CBdd::getNomPa(QString mac)
+{
+    QString NomPa = "NomPaEmpty";
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getNomPa]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT name FROM pas WHERE mac = '"+mac+"'");
+        Aies_query.next();
+        NomPa = Aies_query.value(0).toString();
+        qDebug() << "NomPa: " << NomPa;
+        return NomPa;
+    }
+}
+
+QString CBdd::getModeFonc(QString mac)
+{
+    QString ModeFonc = "ModeFoncEmpty";
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getMarque]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT ModeFonc FROM pas WHERE mac = '"+mac+"'");
+        Aies_query.next();
+        ModeFonc = Aies_query.value(0).toString();
+        qDebug() << "ModeFonc: " << ModeFonc;
+        return ModeFonc;
+    }
+    exit(1);
+}
+
+QString CBdd::getCtrlTv(QString mac)
+{
+    QString CtrlTv = "CtrlTvEmpty";
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getCtrlTv]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT CtrlTv FROM pas WHERE mac = '"+mac+"'");
+        Aies_query.next();
+        CtrlTv = Aies_query.value(0).toString();
+        qDebug() << "CtrlTv: " << CtrlTv;
+        return CtrlTv;
+    }
+    exit(1);
+}
+
+QString CBdd::getPermaUpdateVer()
+{
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getUpdateVer]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QString permaUpdateVer;
+        QSqlQuery Aies_query("SELECT version FROM rpi_update WHERE id=1");
+        Aies_query.next();
+        permaUpdateVer = Aies_query.value(0).toString();
+        return permaUpdateVer;
+    }
+    exit(1);
+}
+
+QString CBdd::getDiffUpdateVer()
+{
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getUpdateVer]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QString diffUpdateVer;
+        QSqlQuery Aies_query("SELECT version FROM rpi_update WHERE id=2");
+        Aies_query.next();
+        diffUpdateVer = Aies_query.value(0).toString();
+        qDebug() << "diffUpdateVer du Serveur : " << diffUpdateVer;
+        return diffUpdateVer;
+    }
+    exit(1);
+}
+
+QString CBdd::getPermaUpdateDate()
+{
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getUpdateDate]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QString permaUpdateDate;
+        QSqlQuery Aies_query("SELECT date FROM rpi_update WHERE id=1");
+        Aies_query.next();
+        permaUpdateDate = Aies_query.value(0).toString();
+        qDebug() << "permaUpdateDate: " << permaUpdateDate;
+        return permaUpdateDate;
+    }
+    exit(1);
+}
+
+QString CBdd::getDiffUpdateDate()
+{
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getUpdateDate]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QString diffUpdateDate = "none";
+        QSqlQuery Aies_query("SELECT date FROM rpi_update WHERE id=2");
+        while(Aies_query.next())
+        {
+            diffUpdateDate = Aies_query.value(0).toString();
+        }
+        return diffUpdateDate;
+    }
+    exit(1);
+}
+
+void CBdd::switchDiffToPerma()
+{
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::switchDiffToPerma]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT version, date, date_create, path, size FROM rpi_update WHERE id=2 LIMIT 1");
+        while(Aies_query.next())
+        {
+            qDebug() << "[sqlDebug] version from rpi_update :" << Aies_query.value(0).toString();
+            QString strUpdateTemp("UPDATE rpi_update SET version='"+Aies_query.value(0).toString()+"', date='"+Aies_query.value(1).toString()+"', date_create='"+Aies_query.value(2).toString()+"', path='"+Aies_query.value(3).toString()+"', size='"+Aies_query.value(4).toString()+"' WHERE id=1");
+            QSqlQuery Aies_update(strUpdateTemp);
+        }
+        QSqlQuery Aies_delete("DELETE FROM rpi_update WHERE id=2");
+        qDebug() << "[switchDiffToPerma]: Changement de maj Diff en maj Perma";
+    }
+}
+
+int CBdd::getIdleTime(QString mac)
+{
+    int idleTime = 0;
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getIdleTime]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT idleTime FROM pas WHERE mac = '"+mac+"'");
+        Aies_query.next();
+        idleTime = Aies_query.value(0).toInt();
+        qDebug() << "idleTime: " << idleTime;
+        return idleTime*1000*60; // en mn
+    }
+    exit(1);
+}
+
+QString CBdd::getHstart(QString mac)
+{
+    QString Hstart = "HstartEmpty";
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getHstart]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT hStart FROM pas WHERE mac = '"+mac+"'");
+        Aies_query.next();
+        Hstart = Aies_query.value(0).toString();
+//        qDebug() << "Hstart: " << Hstart;
+        return Hstart;
+    }
+    exit(1);
+}
+
+QString CBdd::getHstop(QString mac)
+{
+    QString Hstop = "HstopEmpty";
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getHstop]: BDD non ouverte");
+        exit(1);
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT hStop FROM pas WHERE mac = '"+mac+"'");
+        Aies_query.next();
+        Hstop = Aies_query.value(0).toString();
+//        qDebug() << "Hstop: " << Hstop;
+        return Hstop;
+    }
+    exit(1);
+}
+
+void CBdd::setSliderUpdate(QDateTime dateActu)
+{
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug() << "[CBdd::setSliderUpdate]: BDD non ouverte";
+    }
+    else
+    {
+        QSqlQuery Aies_query("SELECT id, date_start FROM slidezone WHERE date_start != '---' AND state = 'diff'");
+        while(Aies_query.next())
+        {
+            QDateTime dateStart = QDateTime::fromString(Aies_query.value(1).toString(), "yyyyMMddHHmm");
+            if(dateStart <= dateActu)
+            {
+                qDebug() << "ID des diapos devenant actives :" << Aies_query.value(0).toInt();
+                QSqlQuery Aies_queryUpdate("UPDATE slidezone SET state = 'actif' WHERE id = "+Aies_query.value(0).toString());
+            }
+        }
+        Aies_query.finish();
+        QSqlQuery Aies_query2("SELECT id, date_stop FROM slidezone WHERE date_stop != '---' AND state = 'actif'");
+        while(Aies_query2.next())
+        {
+            QDateTime dateStop = QDateTime::fromString(Aies_query2.value(1).toString(), "yyyyMMddHHmm");
+            if(dateStop <= dateActu)
+            {
+                qDebug() << "ID des diapos devenant inactives :" << Aies_query.value(0).toInt();
+                QSqlQuery Aies_queryUpdate2("UPDATE slidezone SET state = 'arch', date_stop = '---' WHERE id = "+Aies_query2.value(0).toString());
+            }
+        }
+    }
+}
+
+QList<QList<QString> > CBdd::getActiveSlides(QString mac)
+{
+    bool newData = false;
+    QString req = "SELECT id, path, time, priority FROM slidezone WHERE state = 'actif' AND (zone=0 OR zone="+getNoZone(mac)+") ORDER BY priority";
+
+    QSqlQuery Aies_query(req);
+    QList <QList<QString> > tabSlide;
+    qDebug() << "CBdd::getActiveSlides " << req << " " << Aies_query.size() << " diapo(s) à afficher.";
+    while(Aies_query.next())
+    {
+        newData = true;
+        QList<QString> tempQList;
+        tempQList.append(Aies_query.value(0).toString());
+        tempQList.append(Aies_query.value(1).toString());
+        tempQList.append(Aies_query.value(2).toString());
+        tempQList.append(Aies_query.value(3).toString());
+        tabSlide.append(tempQList);
+    }
+    if(newData == false)
+    {
+        QList<QString> tempQList;
+        tempQList.append("none");
+        tabSlide.append(tempQList);
+    }
+    return tabSlide;
+}
+
+QString CBdd::getActiveFlash()
+{
+    QSqlQuery Aies_query("SELECT content FROM flash WHERE id = 1");
+    QString strFlash;
+    while(Aies_query.next())
+    {
+        strFlash = Aies_query.value(0).toString();
+    }
+    return strFlash;
+}
+
+void CBdd::setCapteurs(QString Query)
+{
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug() << "[CBdd::setCapteurs]: BDD non ouverte";
+    }
+    else
+    {
+        QSqlQuery Aies_query;
+        Aies_query.exec(Query);
+    }
+}
+
+void CBdd::writeBdd(QString query)
+{
+    if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::writeBdd]: BDD non ouverte");
+        exit(1);
+    }
+    QSqlQuery Aies_query(query);
+}
+
+int CBdd::getUrgencyState()
+{
+     if(!Aies_bdd.isOpen())
+    {
+        qDebug("[CBdd::getUrgencyState]: BDD non ouverte"); //verification d'accès à la bdd
+        exit(1);
+    }
+
+     else
+     {
+         int urgencyIsOn = 0;
+         QSqlQuery Aies_query("SELECT isOn FROM urgency"); //prend la valeur dans la BDD
+         Aies_query.next();
+         urgencyIsOn = Aies_query.value(0).toBool(); //transforme la valeur en bool
+ //      qDebug() << "Urgency: " << urgencyIsOn;
+         return urgencyIsOn;
+     }
+}
+
+QList<QString> CBdd::creationCacheVideo(QString mac) {
+    bool newData = false;
+    QString req = "SELECT pathimg FROM slidezone WHERE state = 'actif' AND (zone=0 OR zone="+getNoZone(mac)+") AND pathimg IS NOT NULL";
+    QSqlQuery Aies_query(req); // envoie de la requette a la BDD
+    QList<QString> videoSlide;
+
+    qDebug() << "video " << req << " " << Aies_query.size();
+    while(Aies_query.next()) // la requette nous renvoi un resultat
+    {
+        newData = true;
+        QString tempQList;
+        tempQList.append(Aies_query.value(0).toString()); //on met les diapositive dans une liste pour les traiter
+        videoSlide.append(tempQList);
+    } // wh
+    if(newData == false) //aucune diapositive ne correspond a la requette
+    {
+        QString tempQList;
+        tempQList.append("none");
+        videoSlide.append(tempQList);
+    } // if newdata
+    return videoSlide;
+} // creationCacheVideo
+
+/*
+void CBdd::getListePages(int zone)
+{
+
+}
+
+*/
