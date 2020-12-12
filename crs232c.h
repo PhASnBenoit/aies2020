@@ -6,8 +6,8 @@
 #include <QDebug>
 #include <QThread>
 
-#define ERREUR (char)-1
-#define OK (char)0
+#define ERREUR -1
+#define OK 0
 #define TO 3000  // 3s timeout réception
 
 class CRs232c : public QObject
@@ -15,13 +15,13 @@ class CRs232c : public QObject
     Q_OBJECT
 
 public:
-    explicit CRs232c(QObject *parent = 0, const QString &nomPort = "/dev/ttyUSB0");
+    explicit CRs232c(QObject *parent = nullptr, const QString &nomPort = "/dev/ttyUSB0");
     ~CRs232c();
     int initialiser(QSerialPort::BaudRate vitesse, QSerialPort::DataBits data,
                     QSerialPort::Parity parity, QSerialPort::StopBits nbStop,
                     QSerialPort::FlowControl flow);
     int ouvrirPort();
-    char lire(char *trame, int nbOctets);
+    //char lire(char *trame, int nbOctets);
     int ecrire(char *trame, int nbOctets);
 
 private:

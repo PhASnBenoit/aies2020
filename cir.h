@@ -9,7 +9,7 @@ class CIr : public QObject
     Q_OBJECT
 
 public:
-    explicit CIr(QObject *parent = 0);
+    explicit CIr(QObject *parent = nullptr);
     ~CIr();
     void irOnOff();
 

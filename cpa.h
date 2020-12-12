@@ -17,14 +17,24 @@
 #include "cir.h"
 #include "cecran.h"
 
+// Consignes des ordres ECRAN
 #define ALLUMER 1
 #define ETEINDRE 0
+
+// etat écran
+#define TV_ON 1
+#define TV_OFF 0
+
+// etat d'un ordre à l'écran. améliorer en mettant enum
+#define ORDRE_ATTENTE 0
+#define ORDRE_EN_COURS 1 // un ordre est émis, attente retour alim via USB
+#define ORDRE_PASSED 2  // l'ordre n'a pas été compris par l'écran
 
 class CPa: public QObject
 {
        Q_OBJECT
 public:
-    explicit CPa(QObject *parent= NULL, CBdd *bdd=NULL);
+    explicit CPa(QObject *parent= nullptr, CBdd *bdd=nullptr);
     ~CPa();
     int getUrgency();
     QString getZone();
@@ -57,6 +67,9 @@ public:
     CAdafruit_SGP30 *captQa;
     QByteArray getSDPlace();
     void creationCache();
+    void setEtatOrdre(int etatOrdre);
+
+    int getEtatOrdre() const;
 
 private:
     CEcran *ecran;
@@ -80,6 +93,7 @@ private:
     CBdd *mBdd;
     QTimer *mTimerU;
     bool mConsigne;
+    int m_etatOrdre;
 
 signals:
     void sigPresence(int st);

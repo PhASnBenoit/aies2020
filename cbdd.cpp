@@ -9,9 +9,9 @@ CBdd::CBdd()
     QString databaseName = conf->getBddName();
     QString databaseUsername = conf->getBddUsername();
     QString databasePassword = conf->getBddPassword();
-qDebug() << databaseType;
-qDebug() << databaseName;
-qDebug() << databaseHostname;
+qDebug() << "[CBdd::CBdd] : " << databaseType;
+qDebug() << "[CBdd::CBdd] : " << databaseName;
+qDebug() << "[CBdd::CBdd] : " << databaseHostname;
     Aies_bdd = QSqlDatabase::addDatabase(databaseType);
     Aies_bdd.setDatabaseName(databaseName);
     Aies_bdd.setHostName(databaseHostname);
@@ -61,7 +61,7 @@ QString CBdd::getNomZone(int NoZone)
         QSqlQuery Aies_query("SELECT zones FROM zones WHERE idzone='"+QString::number(NoZone)+"'");
         Aies_query.next();
         NomZone = Aies_query.value(0).toString();
-        qDebug() << "NomZone: " << NomZone;
+        qDebug() << "[CBdd::getNomZone]: NomZone: " << NomZone;
         return NomZone;
     }
 }
@@ -100,7 +100,6 @@ QString CBdd::getModeFonc(QString mac)
         qDebug() << "ModeFonc: " << ModeFonc;
         return ModeFonc;
     }
-    exit(1);
 }
 
 QString CBdd::getCtrlTv(QString mac)
@@ -119,7 +118,6 @@ QString CBdd::getCtrlTv(QString mac)
         qDebug() << "CtrlTv: " << CtrlTv;
         return CtrlTv;
     }
-    exit(1);
 }
 
 QString CBdd::getPermaUpdateVer()
@@ -137,7 +135,6 @@ QString CBdd::getPermaUpdateVer()
         permaUpdateVer = Aies_query.value(0).toString();
         return permaUpdateVer;
     }
-    exit(1);
 }
 
 QString CBdd::getDiffUpdateVer()
@@ -156,7 +153,6 @@ QString CBdd::getDiffUpdateVer()
         qDebug() << "diffUpdateVer du Serveur : " << diffUpdateVer;
         return diffUpdateVer;
     }
-    exit(1);
 }
 
 QString CBdd::getPermaUpdateDate()
@@ -175,7 +171,6 @@ QString CBdd::getPermaUpdateDate()
         qDebug() << "permaUpdateDate: " << permaUpdateDate;
         return permaUpdateDate;
     }
-    exit(1);
 }
 
 QString CBdd::getDiffUpdateDate()
@@ -195,7 +190,6 @@ QString CBdd::getDiffUpdateDate()
         }
         return diffUpdateDate;
     }
-    exit(1);
 }
 
 void CBdd::switchDiffToPerma()
@@ -235,7 +229,6 @@ int CBdd::getIdleTime(QString mac)
         qDebug() << "idleTime: " << idleTime;
         return idleTime*1000*60; // en mn
     }
-    exit(1);
 }
 
 QString CBdd::getHstart(QString mac)
@@ -254,7 +247,6 @@ QString CBdd::getHstart(QString mac)
 //        qDebug() << "Hstart: " << Hstart;
         return Hstart;
     }
-    exit(1);
 }
 
 QString CBdd::getHstop(QString mac)
@@ -273,7 +265,6 @@ QString CBdd::getHstop(QString mac)
 //        qDebug() << "Hstop: " << Hstop;
         return Hstop;
     }
-    exit(1);
 }
 
 void CBdd::setSliderUpdate(QDateTime dateActu)
@@ -383,31 +374,34 @@ int CBdd::getUrgencyState()
          QSqlQuery Aies_query("SELECT isOn FROM urgency"); //prend la valeur dans la BDD
          Aies_query.next();
          urgencyIsOn = Aies_query.value(0).toBool(); //transforme la valeur en bool
- //      qDebug() << "Urgency: " << urgencyIsOn;
+         qDebug() << "[CBdd::getUrgencyState] Urgency: " << urgencyIsOn;
          return urgencyIsOn;
      }
 }
 
-QList<QString> CBdd::creationCacheVideo(QString mac) {
-    bool newData = false;
-    QString req = "SELECT pathimg FROM slidezone WHERE state = 'actif' AND (zone=0 OR zone="+getNoZone(mac)+") AND pathimg IS NOT NULL";
-    QSqlQuery Aies_query(req); // envoie de la requette a la BDD
+QList<QString> CBdd::getImagesVideos(QString mac) {
+//    bool newData = false;
+    QString req = "SELECT pathimg, date_create FROM slidezone WHERE state = 'actif' AND (zone=0 OR zone="+getNoZone(mac)+") AND pathimg IS NOT NULL";
+    QSqlQuery Aies_query(req); // envoie de la requête à la BDD
     QList<QString> videoSlide;
 
-    qDebug() << "video " << req << " " << Aies_query.size();
-    while(Aies_query.next()) // la requette nous renvoi un resultat
+    qDebug() << "[CBdd::getImagesVideos] chargement des images/vidéos " << req << " Nombre : " << Aies_query.size();
+    while(Aies_query.next()) // la requête nous renvoie un resultat
     {
-        newData = true;
+//        newData = true;
         QString tempQList;
-        tempQList.append(Aies_query.value(0).toString()); //on met les diapositive dans une liste pour les traiter
+        tempQList.append(Aies_query.value(0).toString()); //on met les diapos dans une liste
+        qDebug() << "[CBdd::getImagesVideos] chargement de :" << Aies_query.value(0).toString();
         videoSlide.append(tempQList);
     } // wh
+/*
     if(newData == false) //aucune diapositive ne correspond a la requette
     {
         QString tempQList;
         tempQList.append("none");
         videoSlide.append(tempQList);
     } // if newdata
+*/
     return videoSlide;
 } // creationCacheVideo
 

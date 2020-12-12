@@ -35,7 +35,7 @@ public:
     QString getDiffUpdateDate();
     QList<QList<QString> > getActiveSlides(QString mac);
     QString getActiveFlash();
-    QList<QString>  creationCacheVideo(QString mac);
+    QList<QString>  getImagesVideos(QString mac);
 
     //QString getListePages(int zone);
     int getIdleTime(QString mac);

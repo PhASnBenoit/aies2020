@@ -15,7 +15,7 @@ class CCapteurPres : public QObject
     Q_OBJECT
 
 public:
-   explicit CCapteurPres(QObject *parent = NULL);
+   explicit CCapteurPres(QObject *parent = nullptr);
    ~CCapteurPres();
    bool getPresence();
 private:

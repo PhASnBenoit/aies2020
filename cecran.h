@@ -11,7 +11,7 @@ class CEcran : public QObject
 {
     Q_OBJECT
 public:
-    explicit CEcran(QObject *parent = 0, int no = 1);
+    explicit CEcran(QObject *parent = nullptr, int no = 1);
     ~CEcran();
     bool getU();
 

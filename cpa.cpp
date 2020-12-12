@@ -7,23 +7,24 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     ecran = new CEcran(this);
 
     captPres = new CCapteurPres(this);
-    connect(captPres, SIGNAL(sigAffPres(int)), this, SLOT(onSigPresence(int)));
+    connect(captPres, &CCapteurPres::sigAffPres, this, &CPa::onSigPresence);
 
     captTemp = new CCapteurTemp();
 
     emIr = new CIr(this);
+
     mTimerU = new QTimer(this); // timer de vérif de la présence tension.
-    mTimerU->setInterval(30000);  // 20s
-    connect(mTimerU, SIGNAL(timeout()), this, SLOT(onTimerU()));
+    mTimerU->setInterval(30000);  // 30s
+    connect(mTimerU, &QTimer::timeout, this, &CPa::onTimerU);
     mConsigne = ALLUMER;
 
+    m_etatOrdre = ORDRE_ATTENTE;
     mBdd = bdd;
     mMac = getSysMacAddress();
     mNom = bdd->getNomPa(mMac);
     mZone = bdd->getNomZone(bdd->getNoZone(mMac).toInt()); // Tester simplement bdd->getNoZone(mac)
-    mEtatTele = true;  // par défaut allumée
+    mEtatTele = TV_ON;  // par défaut allumée
     mIdleTime = bdd->getIdleTime(mMac);
-
 }
 
 CPa::~CPa()
@@ -40,24 +41,6 @@ void CPa::onSigPresence(int st)
     emit sigPresence(st);
 }
 
-void CPa::onTimerU()
-{
-    mEtatTele = ecran->getU();
-    if (mEtatTele != mConsigne) {
-        emIr->irOnOff();
-        emit sigPa("IR(Rappel)");
-        qDebug() << "[CPa::onTimerU]: Bascule rappel IR";
-        if (mConsigne) { // si consigne=allumer
-            ecran->putOnCec();
-            ecran->putOnRs();
-        } else {
-            ecran->putOffCec();
-            ecran->putOffRs();
-        } // else
-    } else
-        mTimerU->stop();
-} // onTimerU
-
 // Récupére l'adresse mac de la carte
 QString CPa::getSysMacAddress()
 {
@@ -69,6 +52,16 @@ QString CPa::getSysMacAddress()
     fscanf(file_macAddress,"%[^\n]",buffer);
     fclose(file_macAddress);
     return buffer; // renvoie l'adresse mac
+}
+
+int CPa::getEtatOrdre() const
+{
+    return m_etatOrdre;
+}
+
+void CPa::setEtatOrdre(int etatOrdre)
+{
+    m_etatOrdre = etatOrdre;
 }
 
 QString CPa::getZone()
@@ -134,54 +127,78 @@ void CPa::switchDiffToPerma()
     mBdd->switchDiffToPerma();
 }
 
+void CPa::onTimerU()
+{
+    mEtatTele = ecran->getU();
+    if (mEtatTele != mConsigne) { // si au bout de 30s l'ordre est toujours pas exécuté
+        m_etatOrdre = ORDRE_PASSED;
+        emit sigPa("[CPa::onTimerU]: Rappel ordre TV ! Etat TV : " + QString::number(mEtatTele));
+        switch(static_cast<int>(mConsigne)) {
+        case ALLUMER:
+            switchOnTv();
+            break;
+        case ETEINDRE:
+            switchOffTv();
+            break;
+        } // sw
+    } else {
+        mTimerU->stop();
+        m_etatOrdre = ORDRE_ATTENTE;
+    } // else
+} // onTimerU
+
 bool CPa::switchOnTv()
 {
-//     setEtatTele(true);
      QString ctrl=getCtrlTv();
      mConsigne=ALLUMER;
-
-     if(ctrl == "cec") {
-        ecran->putOnCec();
-        emit sigPa("CEC_On");
-        qDebug() << "[CPa::switchOnTv]: On par CEC";
-     }
-     if(ctrl == "ir") {
-         emIr->irOnOff();
-         emit sigPa("IR_On");
-         qDebug() << "[CPa::switchOnTv]: On par IR";
-     }
-     if(ctrl == "rs") {
-         ecran->putOnRs();
-         emit sigPa("RS_On");
-         qDebug() << "[CPa::switchOnTv]: On par RS";
-     } //if rs
-     mTimerU->start();
-     return true;
-}
+     if (m_etatOrdre != ORDRE_EN_COURS) {
+         if(ctrl == "cec") {
+            ecran->putOnCec();
+            emit sigPa("CEC_On");
+            qDebug() << "[CPa::switchOnTv]: On par CEC";
+         }
+         if(ctrl == "ir") {
+             emIr->irOnOff();
+             emit sigPa("IR_On");
+             qDebug() << "[CPa::switchOnTv]: On par IR";
+         }
+         if(ctrl == "rs") {
+             ecran->putOnRs();
+             emit sigPa("RS_On");
+             qDebug() << "[CPa::switchOnTv]: On par RS";
+         } //if rs
+         m_etatOrdre = ORDRE_EN_COURS;
+         mTimerU->start();
+    } // if m_etatOrdre
+    return true;
+} // switchOnTv
 
 bool CPa::switchOffTv()
 {
-    //    setEtatTele(false);
-    mConsigne = ETEINDRE;
     QString ctrl=getCtrlTv();
-    if(ctrl == "cec") {
-        ecran->putOffCec();
-        emit sigPa("CEC_Off");
-        qDebug() << "[CPa::switchOffTv]: Off par CEC";
-    }
-    if(ctrl == "ir") {
-        emIr->irOnOff();
-        emit sigPa("IR_Off");  // pour affichage
-        qDebug() << "[CPa::switchOffTv]: Off par IR";
-    }
-    if(ctrl == "rs") {
-        ecran->putOffRs();
-        emit sigPa("RS_Off");
-        qDebug() << "[CPa::switchOffTv]: Off par RS";
-    }
-    mTimerU->start();
+    mConsigne = ETEINDRE;
+
+    if (m_etatOrdre != ORDRE_EN_COURS) {
+        if(ctrl == "cec") {
+            ecran->putOffCec();
+            emit sigPa("CEC_Off");
+            qDebug() << "[CPa::switchOffTv]: Off par CEC";
+        }
+        if(ctrl == "ir") {
+            emIr->irOnOff();
+            emit sigPa("IR_Off");  // pour affichage
+            qDebug() << "[CPa::switchOffTv]: Off par IR";
+        }
+        if(ctrl == "rs") {
+            ecran->putOffRs();
+            emit sigPa("RS_Off");
+            qDebug() << "[CPa::switchOffTv]: Off par RS";
+        }
+        m_etatOrdre = ORDRE_EN_COURS;
+        mTimerU->start();
+    } // if m_etatOrdre
     return false;
-}
+} // switchOffTv
 
 bool CPa::switchOnLed()
 {
@@ -218,10 +235,8 @@ bool CPa::isItTheMomentToStart()
     QString hStart = getHstart();
     QDateTime qhStart = QDateTime::fromString(hStart,"hh:mm");
 
-    if((day.toString() != "Sat") && (day.toString() != "Sun"))
-    {
-        if((dateTime.toString("hh:mm") == qhStart.toString("hh:mm")) && (!mEtatTele))
-        {
+    if((day.toString() != "Sat") && (day.toString() != "Sun")) {
+        if((dateTime.toString("hh:mm") == qhStart.toString("hh:mm")) && (!mEtatTele)) {
             return true;
         }
     }
@@ -236,13 +251,9 @@ bool CPa::isItTheMomentToStop()
     QString hStop = getHstop();
     QDateTime qhStop = QDateTime::fromString(hStop,"hh:mm");
 
-    if((day.toString() != "Sat") && (day.toString() != "Sun"))
-    {
-        qDebug() << "CPa::isTheMomentToStop : mEtatTele :" << mEtatTele;
-        if((dateTime.toString("hh:mm") == qhStop.toString("hh:mm")) && (mEtatTele))
-        {
-            return true;
-        }
+    //qDebug() << "CPa::isTheMomentToStop : mEtatTele :" << mEtatTele;
+    if((dateTime.toString("hh:mm") == qhStop.toString("hh:mm")) && (mEtatTele)) {
+        return true;
     }
     return false;
 }
@@ -282,7 +293,7 @@ QByteArray CPa::getSDPlace()
  sh.waitForFinished(); //nous attendons le retour de la commande
  QByteArray output = sh.readAll();
  sh.close();//kill le processus
- qDebug() << output;
+ //qDebug() << output;
  return output;
 }
 
@@ -295,15 +306,14 @@ int CPa::getUrgency()
 void CPa::creationCache()
 {
   int i =0;
-  QList<QString> videoSlide = mBdd->creationCacheVideo(mMac);
-  //QString command("scp root@192.168.1.39:"+path+" /home/pi/cache/");
+  QList<QString> videoSlide = mBdd->getImagesVideos(mMac);
   QProcess scp;
 
-  for(i =0;i < videoSlide.size();i++)
+  for(i=0 ; i<videoSlide.size() ; i++)
   {
-    scp.startDetached("sh", QStringList() << "-c" << "scp root@192.168.1.15:/srv/www/htdocs/2020"+videoSlide.at(i)+" /home/pi/cache/");
-    //ici nous utilison la commande scp pout récupérer les vidéos stocker sur le serveur selons leurs chemin d accès
-    qDebug() << "Je suis passé" << i;
+    scp.startDetached("sh", QStringList() << "-c" << "scp root@192.168.1.22:/srv/www/htdocs/2020"+videoSlide.at(i)+" /home/pi/cache/");
+    //ici nous utilisons la commande scp pour récupérer les vidéos stockées sur le serveur selon leur chemin d accès
+    qDebug() << "CPa::creationCache: Met en cache ress : " << videoSlide.at(i);
     scp.close();
   }
 

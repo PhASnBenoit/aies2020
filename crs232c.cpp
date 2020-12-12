@@ -37,11 +37,11 @@ int CRs232c::ouvrirPort()
     } // if res
     return mSp->isOpen();
 }
-
+/*
 char CRs232c::lire(char *trame, int nbOctets)
 {
     if (nbOctets < 1) return ERREUR;
-/*
+
     int res;
     if (to)
         res = mSp->waitForReadyRead(TO); // 3s d'attente max
@@ -75,14 +75,14 @@ char CRs232c::lire(char *trame, int nbOctets)
         return ERREUR;
     } // if res
     mRec=false;
-*/    return OK;
 
+    return OK;
 }
-
+*/
 int CRs232c::ecrire(char *trame, int nbOctets)
 {
     mRec = true; // les futurs cars arrivant sont valides
-    int lg = mSp->write(trame, nbOctets);
+    qint64 lg = mSp->write(trame, nbOctets);
     mSp->waitForBytesWritten(2000);
     if ( lg < nbOctets) {
         qDebug() << "CRs232c::ecrire write KO...";
@@ -94,13 +94,13 @@ int CRs232c::ecrire(char *trame, int nbOctets)
 
 void CRs232c::onReadyRead()
 {
-    int nb=0;
+    qint64 nb=0;
     if (mRec) {
        nb = mSp->bytesAvailable();
        qDebug() << nb << "CRs232c::onReadyRead arrivés.";
        if (nb >= 8) { // réponse complète
-           QByteArray ba = mSp->read((quint64)8);
-           for (int i=0 ; i<8 ; i++) qDebug() << QString::number((unsigned char)ba[i],16) << " ";
+           QByteArray ba = mSp->read(8);
+           for (int i=0 ; i<8 ; i++) qDebug() << QString::number(ba[i],16) << " ";
            mRec = false;
            emit sigReponse(ba[0], ba[1], ba[4], ba[6]);
        } // if nb
@@ -113,5 +113,5 @@ void CRs232c::onReadyRead()
 void CRs232c::onErreur(QSerialPort::SerialPortError err)
 {
     emit sigErreur(err);
-    qDebug() << "CRs232c::onErreur " << err;
+    //qDebug() << "CRs232c::onErreur " << err;
 }

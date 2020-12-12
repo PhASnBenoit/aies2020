@@ -39,7 +39,7 @@ class CTelecommandeRs232Samsung : public QObject
     Q_OBJECT
 
 public:
-    explicit CTelecommandeRs232Samsung(QObject *parent = 0, const QString &nomRs232 = "/dev/ttyUSB0");
+    explicit CTelecommandeRs232Samsung(QObject *parent = nullptr, const QString &nomRs232 = "/dev/ttyUSB0");
     ~CTelecommandeRs232Samsung();
 
     // contrôle de l'alimentation

@@ -28,7 +28,7 @@ float CCapteurTemp::getTemp()
                  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
                  {
                      qDebug() << "[CCapteur::getTemp]: Ouverture du fichier impossible";
-                     return -99.99;
+                     return -99.99L;
                  }
                  else
                  {
@@ -50,5 +50,5 @@ float CCapteurTemp::getTemp()
              } // if prefixe
          } // if symbolic
     } // for
-    return -99.99;
+    return -99.99L;
 }

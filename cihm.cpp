@@ -1,7 +1,7 @@
-#include "cihmappaies2020.h"
+#include "cihm.h"
 #include "ui_cihmappaies2020.h"
 
-CIhmAppAies2020::CIhmAppAies2020(QWidget *parent) :
+CIhm::CIhm(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::CIhmAppAies2020)
 {
@@ -17,8 +17,8 @@ CIhmAppAies2020::CIhmAppAies2020(QWidget *parent) :
     mUpdate=false;
     bdd = new CBdd();
     pa = new CPa(this, bdd);
-    connect(pa, SIGNAL(sigPresence(int)), this, SLOT(onSigPresence(int))); // aff * presence
-    connect(pa, SIGNAL(sigPa(QString)), this, SLOT(onSigPa(QString)));  // aff on/off tv
+    connect(pa, &CPa::sigPresence, this, &CIhm::onSigPresence); // aff * presence
+    connect(pa, &CPa::sigPa, this, &CIhm::onSigPa);  // aff on/off tv
     conf = new CConfig();
     mPresence = false;
     mPriorSwap=false; // pas de priorité pour le moment
@@ -37,29 +37,28 @@ CIhmAppAies2020::CIhmAppAies2020(QWidget *parent) :
 
     // Timer général
     timer = new QTimer();
-    connect(timer, SIGNAL(timeout()), this, SLOT(onTimerHeure()));
-    connect(timer, SIGNAL(timeout()), this, SLOT(onTimerTemperature()));
-    connect(timer, SIGNAL(timeout()), this, SLOT(onTimerBdd()));
-    connect(timer, SIGNAL(timeout()), this, SLOT(onTimerUpdate()));
-    connect(timer, SIGNAL(timeout()), this, SLOT(onTimerFlash()));
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerHeure);  // affichage de l'heure
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerTemperature); // affichage température
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerBdd); // sauve temp, presence, capcite SD dans bdd
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerFlash);  // affichage de l'info flash
 
     // Timer Slide
-    timerSlide = new QTimer();
-    timerIdleSlide = new QTimer();
-    connect(timerSlide, SIGNAL(timeout()), this, SLOT(onTimerSlide()));
-    connect(timerIdleSlide, SIGNAL(timeout()), this, SLOT(onTimerIdleSlide()));
+    timerSlide = new QTimer(); // changement de  slide
+    connect(timerSlide, &QTimer::timeout, this, &CIhm::onTimerSlide);
+
+    timerIdleSlide = new QTimer();  // pour les diapos oups !
+    connect(timerIdleSlide, &QTimer::timeout, this, &CIhm::onTimerIdleSlide);
 
     // Timer d'intervale d'absence
     QString modeFonc = pa->getModeFonc();
     if( modeFonc == "presence")
     {
-        connect(timer, SIGNAL(timeout()), this, SLOT(onTimerCapteur())); // toutes les sec
+        connect(timer, &QTimer::timeout, this, &CIhm::onTimerCapteur); // toutes les sec
         timerPresence = new QTimer(this);
-        connect(timerPresence, SIGNAL(timeout()), this, SLOT(onTimerPresence()));
-    }
-    else  // heure depart et de fin
-    {
-        connect(timer, SIGNAL(timeout()), this, SLOT(onTimerOpenHour()));
+        connect(timerPresence, &QTimer::timeout, this, &CIhm::onTimerPresence);
+    } else { // heure depart et de fin
+        connect(timer, &QTimer::timeout, this, &CIhm::onTimerOpenHour);
     }
 
     timer->start(1000); // Timer général
@@ -74,7 +73,7 @@ CIhmAppAies2020::CIhmAppAies2020(QWidget *parent) :
     getSlide();
 } // fihm
 
-CIhmAppAies2020::~CIhmAppAies2020()
+CIhm::~CIhm()
 {
     delete timer;
     delete timerPresence;
@@ -89,7 +88,7 @@ CIhmAppAies2020::~CIhmAppAies2020()
 }
 
 // Récupere l'heure actuel
-void CIhmAppAies2020::onTimerHeure()
+void CIhm::onTimerHeure()
 {
     QTime Heure;
     Heure = QTime::currentTime();
@@ -102,7 +101,7 @@ void CIhmAppAies2020::onTimerHeure()
 }
 
 // Affiche la temperature
-void CIhmAppAies2020::onTimerTemperature()
+void CIhm::onTimerTemperature()
 {
       float temp = pa->getTemperature();
       if ( (temp<-99) || (temp>99))
@@ -112,20 +111,17 @@ void CIhmAppAies2020::onTimerTemperature()
 }
 
 // Gestion présence
-void CIhmAppAies2020::onTimerCapteur()  // toutes les sec
+void CIhm::onTimerCapteur()  // toutes les sec si presence
 {
     mPresence = pa->getPresence();
-    if(!mPresence)  // si non présence
-    {
+    if(!mPresence) { // si non présence
        if (!timerPresence->isActive()) {
             ui->lTvState->setText("START");
             qDebug() << "(Ré)activation timer Présence détectée.";
             int duree = pa->getIdleTime();
             timerPresence->start(duree); // (duree) activation chrono interval détection presence (mn)
        } // if isactive
-    }
-    else  // si présence
-    {
+    } else { // si présence
        if (timerPresence->isActive()) {
            timerPresence->stop();
        } // isactive
@@ -134,32 +130,29 @@ void CIhmAppAies2020::onTimerCapteur()  // toutes les sec
     } // else presence
 } // onTimerCapteur
 
-void CIhmAppAies2020::onTimerPresence()   // seulement si mode présence et personne devant depuis x mn
+void CIhm::onTimerPresence()   // seulement si mode présence et personne devant depuis x mn
 {
-    if (pa->getEtatTele()) { // si télé allumée pour envoyer l'ordre qu'une fois
-        pa->switchOffTv();
-        qDebug() << "Arrêt TV suite à non présence.";
-    } // if getetattele
+        pa->switchOffTv();  // tente d'éteindre l'écran
 }
 
 // Veille / réveille
-void CIhmAppAies2020::onTimerOpenHour()  // seulement si mode heure depart et fin
+void CIhm::onTimerOpenHour()  // seulement si mode heure depart et fin
 {
     bool repStart = pa->isItTheMomentToStart();
     if(repStart) {
         pa->switchOnTv();
-        qDebug() << "Mode heure dep/arr : Mise en route TV.";
+//        qDebug() << "Mode heure dep/arr : Mise en route TV.";
     }
 
     bool repStop = pa->isItTheMomentToStop();
     if(repStop) {
-        qDebug() << "Mode heure dep/arr : Arrêt de la TV.";
+//        qDebug() << "Mode heure dep/arr : Arrêt de la TV.";
         pa->switchOffTv();
     }
 }
 
 // Ecrire les données capteurs dans la Bdd
-void CIhmAppAies2020::onTimerBdd()
+void CIhm::onTimerBdd()
 {
     mTemp = pa->captTemp->getTemp();
     QString realtemp = QString::number(static_cast<double>(mTemp),'f',1);
@@ -168,26 +161,25 @@ void CIhmAppAies2020::onTimerBdd()
     bdd->setCapteurs("UPDATE pas SET temp='"+realtemp+"', Pourcentage_SD ='"+pourcentage+"', presence='"+(mPresence?"O":"N")+"' WHERE mac='"+mac+"';");
 }
 
-void CIhmAppAies2020::getSlide()
+void CIhm::getSlide()
 {
+    qDebug() << "CIhmAppAies2020::getSlide() : On recommence.";
     bdd->setSliderUpdate(pa->getDateTime()); // met à jour le champ state à actif ou arch pour tous les PA
     mTabSlides = bdd->getActiveSlides(mac); // uniquement celles pour le PA
     mUrgencyState = pa->getUrgency();
     affSlide();
 }
 
-void CIhmAppAies2020::affSlide()
+void CIhm::affSlide()
 {
     QString docs = conf->getHtDocs();
     pa->creationCache();
-    qDebug() << docs << endl;
     mUrgencyState = pa->getUrgency();
-    qDebug() << "urgence"<<  mUrgencyState << endl;
 
-    if(mUrgencyState != 0) {
+    if(mUrgencyState) {
        QUrl url("http://" + mServeur + docs + "/rpi/slide/oups.php");
        ui->webViewStarter->load(url);
-       timerIdleSlide->start(10000);
+       timerIdleSlide->start(10000); //
     } else {
         if(mTabSlides.at(0).at(0) != "none") {
             if(mCompteurSlide < mTabSlides.size()) {
@@ -198,13 +190,13 @@ void CIhmAppAies2020::affSlide()
                     mCompteurSlide++;
                 } // if
                 if (mPriorSwap) {
-                    qDebug() << mPriorSlide.url() << endl;
+                    qDebug() << mPriorSlide.url();
                     ui->webViewStarter->load(mPriorSlide);
                     timerSlide->start(mPriorTime);
                     mPriorSwap = false;
                 } else {
                     QUrl slideUrl("http://" + mServeur + docs + mTabSlides.at(mCompteurSlide).at(1)); // by PhA 2019-01-31
-                    qDebug() << slideUrl.url() << endl;
+                    qDebug() << slideUrl.url();
                     ui->webViewStarter->load(slideUrl);
                     timerSlide->start(mTabSlides.at(mCompteurSlide).at(2).toInt());
                     mPriorSwap = true;
@@ -223,51 +215,47 @@ void CIhmAppAies2020::affSlide()
     }
 } // affSlide
 
-void CIhmAppAies2020::onTimerFlash()
+void CIhm::onTimerFlash()
 {
     ui->lInfoFlash->setText("<html><style> h2 {background-color:red;} h2{color:white;}</style><h2>"+bdd->getActiveFlash()+"</h2></html>");
 }
 
-void CIhmAppAies2020::onTimerUpdate()  // vérification de la maj du logiciel
+void CIhm::onTimerUpdate()  // vérification de la maj du logiciel
 {
     QDateTime dateActu = QDateTime::currentDateTime();
     QString strDateDiff = pa->getDiffUpdateDate();
 
-    if(strDateDiff != "none")
-    {
+    if(strDateDiff != "none") {
         QDateTime dateDiff = QDateTime::fromString(strDateDiff, "yyyyMMddHHmm");
-        if(dateDiff <= dateActu)
-        {
+        if(dateDiff <= dateActu) {
             pa->switchDiffToPerma();
         }
     }
     QString versionPerma = pa->getPermaUpdateVer();
 
-    if( (versionPerma.toFloat()>mVer.toFloat()) && !mUpdate )
-    {
+    if( (versionPerma.toFloat()>mVer.toFloat()) && !mUpdate ) {
         qDebug() << "[fihm::onTimerUpdate]: Lancement de aies_update";
         mUpdate=true;
         //lancement aies_update
         disconnect(this, SLOT(onTimerUpdate()));  // on reçoit plus les signaux MAJ
         system("/home/pi/aies/update/aies_update");
         // prévoir éventuellement de terminer l'application
-
     }
 }
 
-void CIhmAppAies2020::onTimerSlide()
+void CIhm::onTimerSlide()
 {
     timerSlide->stop();
     affSlide();
 }
 
-void CIhmAppAies2020::onTimerIdleSlide()
+void CIhm::onTimerIdleSlide()
 {
     timerIdleSlide->stop();
     getSlide();
 }
 
-void CIhmAppAies2020::onSigPresence(int st)
+void CIhm::onSigPresence(int st)
 {
     ui->lLogoPres->setVisible(st);
     if (st)
@@ -276,7 +264,7 @@ void CIhmAppAies2020::onSigPresence(int st)
         pa->switchOffLed();
 }
 
-void CIhmAppAies2020::onSigPa(QString mess)
+void CIhm::onSigPa(QString mess)
 {
     ui->lTvState->setText(mess);
 }

@@ -26,7 +26,7 @@ SOURCES += main.cpp\
     ctelecommanders232samsung.cpp \
     biblis/cadafruit_sgp30.cpp \
     biblis/ci2c.cpp \
-    cihmappaies2020.cpp
+    cihm.cpp
 
 HEADERS  += \
     cbdd.h \
@@ -42,7 +42,7 @@ HEADERS  += \
     ctelecommanders232samsung.h \
     biblis/cadafruit_sgp30.h \
     biblis/ci2c.h \
-    cihmappaies2020.h
+    cihm.h
 
 FORMS    += \
     cihmappaies2020.ui

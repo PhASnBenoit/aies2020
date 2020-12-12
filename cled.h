@@ -10,7 +10,7 @@ class CLed : public QObject
 {
     Q_OBJECT
 public:
-    explicit CLed(QObject *parent = 0);
+    explicit CLed(QObject *parent = nullptr);
     ~CLed();
 
 private:

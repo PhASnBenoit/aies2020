@@ -16,13 +16,13 @@ namespace Ui {
 class CIhmAppAies2020;
 }
 
-class CIhmAppAies2020 : public QMainWindow
+class CIhm : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit CIhmAppAies2020(QWidget *parent = 0);
-    ~CIhmAppAies2020();
+    explicit CIhm(QWidget *parent = nullptr);
+    ~CIhm();
 
 private:
     Ui::CIhmAppAies2020 *ui;
