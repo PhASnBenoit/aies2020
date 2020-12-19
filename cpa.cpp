@@ -289,23 +289,28 @@ void CPa::calculateSDPlace()
 {
     qDebug() << "[CPa::getSDPlace] Calcul de SD restant.";
     QProcess sh; //on crée ici sh qui est le processus qui va nous permettre de faire une commande en shell
-    sh.setStandardOutputFile("/opt/aies/sd.txt");
-    sh.start("sh", QStringList()<< "-c df / |tr -s ' ' |cut -d ' ' -f5 |head -n 2 |tail -n 1 |tr -d '%'");
+    //sh.setStandardOutputFile("/opt/aies/sd.txt");
+    sh.start("sh", QStringList() <<  "-c" << "df / |tr -s ' ' |cut -d ' ' -f5 |head -n 2 |tail -n 1 |tr -d '%'");
+    //sh.start("sh -c df / |tr -s ' ' |cut -d ' ' -f5 | head -n 2 | tail -n 1 | tr -d '%'");
     //nous faisons ci-dessus la commande qui nous permet de récuperer seulement le pourcentage de la place restante dans la SD
     sh.waitForFinished(); // pas besoin d'attendre, on lira le fichier produit
-    //QByteArray output = sh.readAll();
+    mSDPlace = sh.readAll();
+    qDebug() << "[CPa::getSDPlace] " << mSDPlace;
     sh.close(); //kill le processus
 } // caculateSDPlace
 
 QByteArray CPa::getSDPlace()
 {
  qDebug() << "[CPa::getSDPlace] Lecture SD restant dans /opt/aies/sd.txt";
+ /*
  QFile fic("/opt/aies/sd.txt");
  if (!fic.open(QIODevice::ReadOnly | QIODevice::Text))
     return QByteArray("0");
  QByteArray line = fic.readAll();
  fic.close();
  return line;
+ */
+ return mSDPlace;
 } // getSDPlace
 
 int CPa::getUrgency()

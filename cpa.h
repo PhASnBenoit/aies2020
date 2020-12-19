@@ -95,6 +95,7 @@ private:
     QTimer *mTimerU;
     bool mConsigne;
     int m_etatOrdre;
+    QByteArray mSDPlace;
 
 signals:
     void sigPresence(int st);
