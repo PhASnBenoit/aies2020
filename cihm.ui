@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CIhmAppAies2020</class>
- <widget class="QMainWindow" name="CIhmAppAies2020">
+ <class>CIhm</class>
+ <widget class="QMainWindow" name="CIhm">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -449,7 +449,6 @@
    <zorder>lbPoints</zorder>
    <zorder>lbTemp_2</zorder>
    <zorder>lbMinute</zorder>
-   <zorder>lLogo</zorder>
    <zorder>lZone</zorder>
    <zorder>lPa</zorder>
    <zorder>lbTemp</zorder>
@@ -461,6 +460,7 @@
    <zorder>webViewStarter</zorder>
    <zorder>lModeFonc</zorder>
    <zorder>lType</zorder>
+   <zorder>lLogo</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -468,7 +468,7 @@
      <x>0</x>
      <y>0</y>
      <width>1920</width>
-     <height>28</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>

@@ -1,16 +1,16 @@
 #include "cihm.h"
-#include "ui_cihmappaies2020.h"
+#include "ui_cihm.h"
 
 CIhm::CIhm(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::CIhmAppAies2020)
+    ui(new Ui::CIhm)
 {
     // initialisation IHM
     ui->setupUi(this);
     ui->lLogoIr->setVisible(false);
     ui->lLogoPres->setVisible(true); // par défaut
-    QPixmap logoPath("logoLAB.png");
-    QPixmap logoPath1("presence1.png");
+    QPixmap logoPath("/opt/aies/logoLAB.png");
+    QPixmap logoPath1("/opt/aies/presence1.png");
     QApplication::setOverrideCursor(QCursor(Qt::BlankCursor));  // Rend invisible le curseur
 
     // Initialisation des objets
@@ -21,13 +21,14 @@ CIhm::CIhm(QWidget *parent) :
     connect(pa, &CPa::sigPa, this, &CIhm::onSigPa);  // aff on/off tv
     conf = new CConfig();
     mPresence = false;
-    mPriorSwap=false; // pas de priorité pour le moment
+    mPriorSwap=false;
+    mPrior=false;  // Pas de dispo prioritaire
     mVer = conf->getNumVersion();
     mServeur = conf->getBddHostname();
 
     mac = pa->getMac();  // Stockage de l'adresse MAC dans une variable global
-
     currentName = pa->getNom();   // Acquisition nom de la Rpi par l'adresse MAC
+
     //Initialisation UI fihm
     ui->lLogo->setPixmap(logoPath);
     ui->lPa->setText(pa->getNom());
@@ -35,33 +36,45 @@ CIhm::CIhm(QWidget *parent) :
     ui->lVersion->setText(mVer);
     ui->lLogoPres->setPixmap(logoPath1);
 
-    // Timer général
-    timer = new QTimer();
-    connect(timer, &QTimer::timeout, this, &CIhm::onTimerHeure);  // affichage de l'heure
-    connect(timer, &QTimer::timeout, this, &CIhm::onTimerTemperature); // affichage température
-    connect(timer, &QTimer::timeout, this, &CIhm::onTimerBdd); // sauve temp, presence, capcite SD dans bdd
-    connect(timer, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
-    connect(timer, &QTimer::timeout, this, &CIhm::onTimerFlash);  // affichage de l'info flash
+    // timer surveillance capacité de la SD
+    timerCapaSd = new QTimer();
+
+    // timer 30s pour horloge et température
+    timerAffHeureTempMaj = new QTimer();
+    connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerHeure);  // affichage de l'heure
+    connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerTemperature); // affichage température
+    connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
+    connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerBdd); // mise à jour du logiciel
 
     // Timer Slide
     timerSlide = new QTimer(); // changement de  slide
     connect(timerSlide, &QTimer::timeout, this, &CIhm::onTimerSlide);
 
-    timerIdleSlide = new QTimer();  // pour les diapos oups !
-    connect(timerIdleSlide, &QTimer::timeout, this, &CIhm::onTimerIdleSlide);
+    timerOupsSlide = new QTimer();  // pour les diapos oups !
+    connect(timerOupsSlide, &QTimer::timeout, this, &CIhm::onTimerOupsSlide);
+
+    // Timer général
+    timer = new QTimer();
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerFlash);  // affichage de l'info flash
+    //connect(timer, &QTimer::timeout, this, &CIhm::onTimerBdd); // sauve temp, presence, capcite SD dans bdd
 
     // Timer d'intervale d'absence
     QString modeFonc = pa->getModeFonc();
     if( modeFonc == "presence")
     {
         connect(timer, &QTimer::timeout, this, &CIhm::onTimerCapteur); // toutes les sec
-        timerPresence = new QTimer(this);
-        connect(timerPresence, &QTimer::timeout, this, &CIhm::onTimerPresence);
+        timerNonPresence = new QTimer(this);
+        connect(timerNonPresence, &QTimer::timeout, this, &CIhm::onTimerNonPresence);
     } else { // heure depart et de fin
         connect(timer, &QTimer::timeout, this, &CIhm::onTimerOpenHour);
     }
 
-    timer->start(1000); // Timer général
+    onTimerHeure();  // premier affichage de l'heure
+    onTimerTemperature();
+
+    timer->start(1000); // Timer général 1s
+    timerAffHeureTempMaj->start(30000);  //30s
+    timerCapaSd->start(300000);  // 5mn
 
     // affichage mode fonc et type commande écran
     ui->lModeFonc->setText(modeFonc);
@@ -76,9 +89,11 @@ CIhm::CIhm(QWidget *parent) :
 CIhm::~CIhm()
 {
     delete timer;
-    delete timerPresence;
+    delete timerAffHeureTempMaj;
+    delete timerCapaSd;
+    delete timerNonPresence;
     delete timerSlide;
-    delete timerIdleSlide;
+    delete timerOupsSlide;
     delete maj;
     delete flash;
     delete pa;
@@ -92,10 +107,12 @@ void CIhm::onTimerHeure()
 {
     QTime Heure;
     Heure = QTime::currentTime();
+
     if (ui->lbPoints->isVisible())
         ui->lbPoints->setVisible(false);    //
     else                                    // clignotement des 2 points de l'heure
         ui->lbPoints->setVisible(true);     //
+
     ui->lbHeure->setText(Heure.toString("hh"));     // affiche l'heure
     ui->lbMinute->setText(Heure.toString("mm"));    // affiche les minutes
 }
@@ -111,26 +128,26 @@ void CIhm::onTimerTemperature()
 }
 
 // Gestion présence
-void CIhm::onTimerCapteur()  // toutes les sec si presence
+void CIhm::onTimerCapteur()  //  si mode presence
 {
     mPresence = pa->getPresence();
     if(!mPresence) { // si non présence
-       if (!timerPresence->isActive()) {
+       if (!timerNonPresence->isActive()) {
             ui->lTvState->setText("START");
-            qDebug() << "(Ré)activation timer Présence détectée.";
             int duree = pa->getIdleTime();
-            timerPresence->start(duree); // (duree) activation chrono interval détection presence (mn)
+            timerNonPresence->start(duree);
        } // if isactive
     } else { // si présence
-       if (timerPresence->isActive()) {
-           timerPresence->stop();
+       if (timerNonPresence->isActive()) {
+           timerNonPresence->stop();
        } // isactive
-       if (!pa->getEtatTele())
+       if (!pa->getEtatTele()) {
            pa->switchOnTv();
+       } // if getEtat
     } // else presence
 } // onTimerCapteur
 
-void CIhm::onTimerPresence()   // seulement si mode présence et personne devant depuis x mn
+void CIhm::onTimerNonPresence()   // seulement si mode présence et personne devant depuis x mn
 {
         pa->switchOffTv();  // tente d'éteindre l'écran
 }
@@ -158,14 +175,17 @@ void CIhm::onTimerBdd()
     QString realtemp = QString::number(static_cast<double>(mTemp),'f',1);
     mPresence = pa->captPres->getPresence();
     QByteArray pourcentage = pa->getSDPlace();
-    bdd->setCapteurs("UPDATE pas SET temp='"+realtemp+"', Pourcentage_SD ='"+pourcentage+"', presence='"+(mPresence?"O":"N")+"' WHERE mac='"+mac+"';");
+    bdd->setCapteurs("UPDATE pas SET temp='"+realtemp+"', Pourcentage_SD ='"+pourcentage+"', presence='"+(pa->getEtatTele()?"O":"N")+"' WHERE mac='"+mac+"';");
 }
 
 void CIhm::getSlide()
 {
-    qDebug() << "CIhmAppAies2020::getSlide() : On recommence.";
+    qDebug() << endl << "CIhmAppAies2020::getSlide() : On recommence.";
+    pa->calculateSDPlace();
+    pa->creationCache();
     bdd->setSliderUpdate(pa->getDateTime()); // met à jour le champ state à actif ou arch pour tous les PA
     mTabSlides = bdd->getActiveSlides(mac); // uniquement celles pour le PA
+    qDebug() << "CIhm::getSlide Nbe de diapo : " << mTabSlides.size();
     mUrgencyState = pa->getUrgency();
     affSlide();
 }
@@ -173,23 +193,25 @@ void CIhm::getSlide()
 void CIhm::affSlide()
 {
     QString docs = conf->getHtDocs();
-    pa->creationCache();
     mUrgencyState = pa->getUrgency();
 
     if(mUrgencyState) {
-       QUrl url("http://" + mServeur + docs + "/rpi/slide/oups.php");
+        qDebug() << "[CIhm::affSlide] FIN URGENTE DE L'AFFICHAGE";
+        QUrl url("http://" + mServeur + docs + "/rpi/slide/oups.php");
        ui->webViewStarter->load(url);
-       timerIdleSlide->start(10000); //
+       timerOupsSlide->start(10000); //
     } else {
         if(mTabSlides.at(0).at(0) != "none") {
+            if (timerOupsSlide->isActive()) timerOupsSlide->stop();
             if(mCompteurSlide < mTabSlides.size()) {
-                if (mTabSlides.at(mCompteurSlide).at(3) == "yes") {
+                if (mTabSlides.at(mCompteurSlide).at(3) == "yes") { // si diapo prioritaire
                     mPriorSlide.setUrl("http://" + mServeur + docs + mTabSlides.at(mCompteurSlide).at(1));// by PhA 2019-01-31
                     mPriorSwap=true;
+                    mPrior=true;
                     mPriorTime=mTabSlides.at(mCompteurSlide).at(2).toInt();
-                    mCompteurSlide++;
+                    mCompteurSlide++; // j'ai des doutes ! PhA 20201217
                 } // if
-                if (mPriorSwap) {
+                if (mPriorSwap && mPrior) { // aff de la prioritaire si existe
                     qDebug() << mPriorSlide.url();
                     ui->webViewStarter->load(mPriorSlide);
                     timerSlide->start(mPriorTime);
@@ -207,10 +229,10 @@ void CIhm::affSlide()
                 getSlide();
             } // else mCompteurSlide
         }
-        else {
+        else { // Pas URGENCE mais pas de diapo à afficher.
             QUrl url("http://" + mServeur + docs + "/rpi/slide/oups.php");  // by PhA 2019-01-31
             ui->webViewStarter->load(url);
-            timerIdleSlide->start(10000);
+            timerOupsSlide->start(10000);
         } // else
     }
 } // affSlide
@@ -238,7 +260,7 @@ void CIhm::onTimerUpdate()  // vérification de la maj du logiciel
         mUpdate=true;
         //lancement aies_update
         disconnect(this, SLOT(onTimerUpdate()));  // on reçoit plus les signaux MAJ
-        system("/home/pi/aies/update/aies_update");
+        system("/opt/update/aies_update");
         // prévoir éventuellement de terminer l'application
     }
 }
@@ -249,9 +271,9 @@ void CIhm::onTimerSlide()
     affSlide();
 }
 
-void CIhm::onTimerIdleSlide()
+void CIhm::onTimerOupsSlide()
 {
-    timerIdleSlide->stop();
+    timerOupsSlide->stop();
     getSlide();
 }
 

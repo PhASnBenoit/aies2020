@@ -8,6 +8,7 @@
 #include <QSqlError>
 #include <QTimer>
 #include <QDateTime>
+#include <QFile>
 
 #include "cbdd.h"
 #include "cled.h"
@@ -65,10 +66,10 @@ public:
     CCapteurPres *captPres;
     CCapteurTemp *captTemp;
     CAdafruit_SGP30 *captQa;
+    void calculateSDPlace();
     QByteArray getSDPlace();
     void creationCache();
     void setEtatOrdre(int etatOrdre);
-
     int getEtatOrdre() const;
 
 private:

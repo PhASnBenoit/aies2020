@@ -2,14 +2,14 @@
 
 CConfig::CConfig()
 {
-    QSettings settings("/home/pi/aies/aies2020/aies.ini", QSettings::IniFormat);
+    QSettings settings("aies.ini", QSettings::IniFormat);
     BddType = settings.value("Bdd/type", "QMYSQL").toString();
     BddHostname = settings.value("Serveur/ip", "192.168.1.15").toString();
     BddName = settings.value("Bdd/name", "aies2020").toString();
     BddUsername = settings.value("Bdd/username", "aies2020").toString();
     BddPassword = settings.value("Bdd/password", "aies2020").toString();
-    NumVersion = settings.value("Rpi/version", "1.0").toString();
-    htDocs = settings.value("Serveur/htdocs", "/2020").toString();  // by PhA 2019-01-31
+    NumVersion = settings.value("Rpi/version", "4.0").toString();
+    htDocs = settings.value("Serveur/htdocs", "/").toString();  // by PhA 2019-01-31
 }
 
 QString CConfig::getBddType()

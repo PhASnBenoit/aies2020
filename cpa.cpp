@@ -285,17 +285,28 @@ QString CPa::getMac()
     return mMac;
 }
 
+void CPa::calculateSDPlace()
+{
+    qDebug() << "[CPa::getSDPlace] Calcul de SD restant.";
+    QProcess sh; //on crée ici sh qui est le processus qui va nous permettre de faire une commande en shell
+    sh.setStandardOutputFile("/opt/aies/sd.txt");
+    sh.start("sh", QStringList()<< "-c df / |tr -s ' ' |cut -d ' ' -f5 |head -n 2 |tail -n 1 |tr -d '%'");
+    //nous faisons ci-dessus la commande qui nous permet de récuperer seulement le pourcentage de la place restante dans la SD
+    sh.waitForFinished(); // pas besoin d'attendre, on lira le fichier produit
+    //QByteArray output = sh.readAll();
+    sh.close(); //kill le processus
+} // caculateSDPlace
+
 QByteArray CPa::getSDPlace()
 {
- QProcess sh; //on crée ici sh qui est le processus qui va nous permettre de faire une commande en shell
- sh.start("sh", QStringList() << "-c" << "df / |tr -s ' ' |cut -d ' ' -f5 |head -n 2 |tail -n 1 |tr -d '%'l");
- // nous faisons ci-dessus la commande qui nous permet de récuperer seulement le pourcentage de la place restante dans la SD
- sh.waitForFinished(); //nous attendons le retour de la commande
- QByteArray output = sh.readAll();
- sh.close();//kill le processus
- //qDebug() << output;
- return output;
-}
+ qDebug() << "[CPa::getSDPlace] Lecture SD restant dans /opt/aies/sd.txt";
+ QFile fic("/opt/aies/sd.txt");
+ if (!fic.open(QIODevice::ReadOnly | QIODevice::Text))
+    return QByteArray("0");
+ QByteArray line = fic.readAll();
+ fic.close();
+ return line;
+} // getSDPlace
 
 int CPa::getUrgency()
 {
@@ -308,12 +319,17 @@ void CPa::creationCache()
   int i =0;
   QList<QString> videoSlide = mBdd->getImagesVideos(mMac);
   QProcess scp;
+  CConfig conf;
 
+  qDebug() << "Chargement du cache.";
   for(i=0 ; i<videoSlide.size() ; i++)
   {
-    scp.startDetached("sh", QStringList() << "-c" << "scp root@192.168.1.22:/srv/www/htdocs/2020"+videoSlide.at(i)+" /home/pi/cache/");
+    QString command="scp root@"+conf.getBddHostname()+":/srv/www/htdocs"+
+            conf.getHtDocs()+videoSlide.at(i)+" /opt/aies/cache/";
+    qDebug() << "CPa::creationCache: " << command;
+    scp.startDetached(command);
     //ici nous utilisons la commande scp pour récupérer les vidéos stockées sur le serveur selon leur chemin d accès
-    qDebug() << "CPa::creationCache: Met en cache ress : " << videoSlide.at(i);
+    //qDebug() << "CPa::creationCache: Met en cache ress : " << videoSlide.at(i);
     scp.close();
   }
 

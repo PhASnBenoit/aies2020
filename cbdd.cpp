@@ -115,7 +115,7 @@ QString CBdd::getCtrlTv(QString mac)
         QSqlQuery Aies_query("SELECT CtrlTv FROM pas WHERE mac = '"+mac+"'");
         Aies_query.next();
         CtrlTv = Aies_query.value(0).toString();
-        qDebug() << "CtrlTv: " << CtrlTv;
+        //qDebug() << "CtrlTv: " << CtrlTv;
         return CtrlTv;
     }
 }
@@ -374,34 +374,34 @@ int CBdd::getUrgencyState()
          QSqlQuery Aies_query("SELECT isOn FROM urgency"); //prend la valeur dans la BDD
          Aies_query.next();
          urgencyIsOn = Aies_query.value(0).toBool(); //transforme la valeur en bool
-         qDebug() << "[CBdd::getUrgencyState] Urgency: " << urgencyIsOn;
+         //qDebug() << "[CBdd::getUrgencyState] Urgency: " << urgencyIsOn;
          return urgencyIsOn;
      }
 }
 
 QList<QString> CBdd::getImagesVideos(QString mac) {
-//    bool newData = false;
+    bool newData = false;
     QString req = "SELECT pathimg, date_create FROM slidezone WHERE state = 'actif' AND (zone=0 OR zone="+getNoZone(mac)+") AND pathimg IS NOT NULL";
     QSqlQuery Aies_query(req); // envoie de la requête à la BDD
     QList<QString> videoSlide;
 
-    qDebug() << "[CBdd::getImagesVideos] chargement des images/vidéos " << req << " Nombre : " << Aies_query.size();
+    qDebug() << "[CBdd::getImagesVideos] obtention liste des images/vidéos " << req << " Nombre : " << Aies_query.size();
     while(Aies_query.next()) // la requête nous renvoie un resultat
     {
-//        newData = true;
+        newData = true;
         QString tempQList;
         tempQList.append(Aies_query.value(0).toString()); //on met les diapos dans une liste
-        qDebug() << "[CBdd::getImagesVideos] chargement de :" << Aies_query.value(0).toString();
+        qDebug() << "[CBdd::getImagesVideos] Mise en liste de :" << Aies_query.value(0).toString();
         videoSlide.append(tempQList);
     } // wh
-/*
+
     if(newData == false) //aucune diapositive ne correspond a la requette
     {
         QString tempQList;
         tempQList.append("none");
         videoSlide.append(tempQList);
     } // if newdata
-*/
+
     return videoSlide;
 } // creationCacheVideo
 

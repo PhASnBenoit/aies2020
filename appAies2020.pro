@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui webkitwidgets sql serialport network
+QT       += core gui sql serialport network webkitwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -45,4 +45,4 @@ HEADERS  += \
     cihm.h
 
 FORMS    += \
-    cihmappaies2020.ui
+    cihm.ui

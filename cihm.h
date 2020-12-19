@@ -1,5 +1,5 @@
-#ifndef CIHMAPPAIES2020_H
-#define CIHMAPPAIES2020_H
+#ifndef CIHM_H
+#define CIHM_H
 
 #include <QMainWindow>
 #include <QDebug>
@@ -13,7 +13,7 @@
 #include "cconfig.h"
 
 namespace Ui {
-class CIhmAppAies2020;
+class CIhm;
 }
 
 class CIhm : public QMainWindow
@@ -25,7 +25,7 @@ public:
     ~CIhm();
 
 private:
-    Ui::CIhmAppAies2020 *ui;
+    Ui::CIhm *ui;
     CBdd *bdd;
     CPa *pa;
     CConfig *conf;
@@ -40,11 +40,14 @@ private:
     bool mPriorSwap;  // bascule avec slide prioritaire
     int mPriorTime;  // durée slide prioritaire
     bool mUpdate;
+    bool mPrior;
     QList <QList<QString> > mTabSlides;
-    QTimer *timerPresence;
+    QTimer *timerNonPresence;
     QTimer *timerSlide;
-    QTimer *timerIdleSlide;
+    QTimer *timerOupsSlide;
     QTimer *timer;
+    QTimer *timerAffHeureTempMaj;
+    QTimer *timerCapaSd;
     QTimer *maj;
     QTimer *flash;
     int idEnCours;
@@ -59,15 +62,15 @@ private slots:
     void onTimerHeure();
     void onTimerTemperature();
     void onTimerCapteur();
-    void onTimerPresence();
+    void onTimerNonPresence();
     void onTimerOpenHour();
     void onTimerBdd();
     void onTimerUpdate();
     void onTimerSlide();
     void onTimerFlash();
-    void onTimerIdleSlide();
+    void onTimerOupsSlide();
     void onSigPresence(int st);
     void onSigPa(QString mess);
 };
 
-#endif // CIHMAPPAIES2020_H
+#endif // CIHM_H
