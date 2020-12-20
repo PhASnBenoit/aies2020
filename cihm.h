@@ -61,7 +61,7 @@ private:
 private slots:
     void onTimerHeure();
     void onTimerTemperature();
-    void onTimerCapteur();
+    void onTimerCapteurPresence();
     void onTimerNonPresence();
     void onTimerOpenHour();
     void onTimerBdd();

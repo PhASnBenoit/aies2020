@@ -131,6 +131,8 @@ void CPa::switchDiffToPerma()
 void CPa::onTimerU()
 {
     mOrdrePassed=false;
+    qDebug() << "[CPa::onTimerU] mEtatReelTele:"<<mEtatReelTele
+             << " mConsigne:"<< mConsigne;
     if (mEtatReelTele != mConsigne) { // si au bout de 30s l'ordre est toujours pas exécuté
         qDebug() << "[CPa::onTimerU]: Rappel ordre TV !";
         switch(static_cast<int>(mConsigne)) {
@@ -150,6 +152,7 @@ bool CPa::switchOnTv()
 {
      QString ctrl=getCtrlTv();
      mConsigne=ALLUMER;
+
      if (!mOrdrePassed) {
          mOrdrePassed=true;
          if(ctrl == "cec") {
@@ -264,7 +267,7 @@ bool CPa::getEtatReelTv()
 
 void CPa::setEtatReelTv(bool state)
 {
-    mConsigne = state;
+    mEtatReelTele = state;
 }
 
 void CPa::setIdleTime(int idleTime)
@@ -300,15 +303,7 @@ void CPa::calculateSDPlace()
 
 QByteArray CPa::getSDPlace()
 {
- qDebug() << "[CPa::getSDPlace] Lecture SD restant dans /opt/aies/sd.txt";
- /*
- QFile fic("/opt/aies/sd.txt");
- if (!fic.open(QIODevice::ReadOnly | QIODevice::Text))
-    return QByteArray("0");
- QByteArray line = fic.readAll();
- fic.close();
- return line;
- */
+ //qDebug() << "[CPa::getSDPlace] Lecture SD restant.";
  return mSDPlace;
 } // getSDPlace
 

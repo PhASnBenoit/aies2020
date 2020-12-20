@@ -64,8 +64,9 @@ CIhm::CIhm(QWidget *parent) :
     QString modeFonc = pa->getModeFonc();
     if( modeFonc == "presence")
     {
-        connect(timer, &QTimer::timeout, this, &CIhm::onTimerCapteur); // toutes les sec
+        connect(timer, &QTimer::timeout, this, &CIhm::onTimerCapteurPresence); // toutes les sec
         timerNonPresence = new QTimer(this);
+        timerNonPresence->setSingleShot(true);
         connect(timerNonPresence, &QTimer::timeout, this, &CIhm::onTimerNonPresence);
     } else { // heure depart et de fin
         connect(timer, &QTimer::timeout, this, &CIhm::onTimerOpenHour);
@@ -130,16 +131,18 @@ void CIhm::onTimerTemperature()
 }
 
 // Gestion présence
-void CIhm::onTimerCapteur()  //  si mode presence
+void CIhm::onTimerCapteurPresence()  //  si mode presence
 {
     mPresence = pa->getPresence();
     qDebug() << "[CIhm::onTimerCapteur] mPresence="<<mPresence;
     if(!mPresence) { // si non présence
-       if (!timerNonPresence->isActive()) {
-            ui->lTvState->setText("START");
-            int duree = pa->getIdleTime();
-            timerNonPresence->start(duree);
-       } // if isactive
+        if (pa->getEtatReelTv()) {
+           if (!timerNonPresence->isActive()) {
+                int duree = pa->getIdleTime();
+                timerNonPresence->setInterval(duree);
+                timerNonPresence->start(); // relance durée de non présence devant l'écran
+           } // if isactive
+        } // if getetatreel
     } else { // si présence
        qDebug() << "[CIhm::onTimerCapteur] Détection présence.";
        if (timerNonPresence->isActive()) {
@@ -175,7 +178,10 @@ void CIhm::onTimerOpenHour()  // seulement si mode heure depart et fin
 // Ecrire les données capteurs dans la Bdd
 void CIhm::onTimerBdd()  // toutes les secs
 {
-    ui->lTvState->setText((pa->ecran->getU()?"TV-ON":"TV-OFF"));
+    bool u=pa->ecran->getU();
+    pa->setEtatReelTv(u);
+    ui->lTvState->setText((u?"TV-ON":"TV-OFF"));
+
 //    ui->lConsigne->setText((pa->getConsigne()?"TV-ON":"TV-OFF"));
 
     mTemp = pa->captTemp->getTemp();
