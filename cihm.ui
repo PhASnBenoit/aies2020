@@ -429,7 +429,7 @@
      </rect>
     </property>
     <property name="text">
-     <string/>
+     <string>NC</string>
     </property>
    </widget>
    <widget class="QLabel" name="lType">
@@ -442,7 +442,20 @@
      </rect>
     </property>
     <property name="text">
-     <string/>
+     <string>NC</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lConsigne">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>1051</y>
+      <width>68</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>NC</string>
     </property>
    </widget>
    <zorder>lbHeure</zorder>
@@ -461,6 +474,7 @@
    <zorder>lModeFonc</zorder>
    <zorder>lType</zorder>
    <zorder>lLogo</zorder>
+   <zorder>lConsigne</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

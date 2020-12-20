@@ -70,7 +70,7 @@ private slots:
     void onTimerFlash();
     void onTimerOupsSlide();
     void onSigPresence(int st);
-    void onSigPa(QString mess);
+    void onSigPaConsigne(QString mess);
 };
 
 #endif // CIHM_H

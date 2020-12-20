@@ -23,14 +23,15 @@
 #define ETEINDRE 0
 
 // etat écran
-#define TV_ON 1
-#define TV_OFF 0
+#define ALLUMED 1
+#define ETEINT 0
 
+/*
 // etat d'un ordre à l'écran. améliorer en mettant enum
 #define ORDRE_ATTENTE 0
 #define ORDRE_EN_COURS 1 // un ordre est émis, attente retour alim via USB
 #define ORDRE_PASSED 2  // l'ordre n'a pas été compris par l'écran
-
+*/
 class CPa: public QObject
 {
        Q_OBJECT
@@ -53,8 +54,8 @@ public:
     int getIdleTime();
     bool isItTheMomentToStart();
     bool isItTheMomentToStop();
-    bool getEtatTele();
-    void setEtatTele(bool state);
+    bool getEtatReelTv();
+    void setEtatReelTv(bool state);
     void setIdleTime(int idleTime);
     void switchDiffToPerma();
     bool switchOnTv();
@@ -69,11 +70,13 @@ public:
     void calculateSDPlace();
     QByteArray getSDPlace();
     void creationCache();
-    void setEtatOrdre(int etatOrdre);
-    int getEtatOrdre() const;
+    bool getConsigne() const;
+    void setConsigne(bool consigne);
+
+    CEcran *ecran;
 
 private:
-    CEcran *ecran;
+
     CIr *emIr;
     CLed *led;
     QString mZone;
@@ -89,17 +92,17 @@ private:
     QString mDiffUpdateDate;
     QString mDateIs;
     int mIdleTime;
-    bool mEtatTele;
+    bool mEtatReelTele;
     QString getSysMacAddress();
     CBdd *mBdd;
     QTimer *mTimerU;
     bool mConsigne;
-    int m_etatOrdre;
+    bool mOrdrePassed;
     QByteArray mSDPlace;
 
 signals:
     void sigPresence(int st);
-    void sigPa(QString mess);
+    void sigPaConsigne(QString mess);
 
 private slots:
     void onSigPresence(int st);

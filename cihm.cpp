@@ -18,7 +18,7 @@ CIhm::CIhm(QWidget *parent) :
     bdd = new CBdd();
     pa = new CPa(this, bdd);
     connect(pa, &CPa::sigPresence, this, &CIhm::onSigPresence); // aff * presence
-    connect(pa, &CPa::sigPa, this, &CIhm::onSigPa);  // aff on/off tv
+    connect(pa, &CPa::sigPaConsigne, this, &CIhm::onSigPaConsigne);  // aff on/off tv
     conf = new CConfig();
     mPresence = false;
     mPriorSwap=false;
@@ -35,6 +35,8 @@ CIhm::CIhm(QWidget *parent) :
     ui->lZone->setText(pa->getZone());
     ui->lVersion->setText(mVer);
     ui->lLogoPres->setPixmap(logoPath1);
+    ui->lConsigne->setText((pa->getConsigne()?"C-ON":"C-OFF"));
+    ui->lTvState->setText((pa->getEtatReelTv()?"TV-ON":"TV-OFF"));
 
     // timer surveillance capacité de la SD
     timerCapaSd = new QTimer();
@@ -44,7 +46,7 @@ CIhm::CIhm(QWidget *parent) :
     connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerHeure);  // affichage de l'heure
     connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerTemperature); // affichage température
     connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
-    connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerBdd); // mise à jour du logiciel
+    //connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerBdd); // mise à jour du logiciel
 
     // Timer Slide
     timerSlide = new QTimer(); // changement de  slide
@@ -56,7 +58,7 @@ CIhm::CIhm(QWidget *parent) :
     // Timer général
     timer = new QTimer();
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerFlash);  // affichage de l'info flash
-    //connect(timer, &QTimer::timeout, this, &CIhm::onTimerBdd); // sauve temp, presence, capcite SD dans bdd
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerBdd); // sauve temp, presence, capcite SD dans bdd
 
     // Timer d'intervale d'absence
     QString modeFonc = pa->getModeFonc();
@@ -131,6 +133,7 @@ void CIhm::onTimerTemperature()
 void CIhm::onTimerCapteur()  //  si mode presence
 {
     mPresence = pa->getPresence();
+    qDebug() << "[CIhm::onTimerCapteur] mPresence="<<mPresence;
     if(!mPresence) { // si non présence
        if (!timerNonPresence->isActive()) {
             ui->lTvState->setText("START");
@@ -138,10 +141,11 @@ void CIhm::onTimerCapteur()  //  si mode presence
             timerNonPresence->start(duree);
        } // if isactive
     } else { // si présence
+       qDebug() << "[CIhm::onTimerCapteur] Détection présence.";
        if (timerNonPresence->isActive()) {
            timerNonPresence->stop();
        } // isactive
-       if (!pa->getEtatTele()) {
+       if (!pa->getEtatReelTv()) {
            pa->switchOnTv();
        } // if getEtat
     } // else presence
@@ -169,13 +173,16 @@ void CIhm::onTimerOpenHour()  // seulement si mode heure depart et fin
 }
 
 // Ecrire les données capteurs dans la Bdd
-void CIhm::onTimerBdd()
+void CIhm::onTimerBdd()  // toutes les secs
 {
+    ui->lTvState->setText((pa->ecran->getU()?"TV-ON":"TV-OFF"));
+//    ui->lConsigne->setText((pa->getConsigne()?"TV-ON":"TV-OFF"));
+
     mTemp = pa->captTemp->getTemp();
     QString realtemp = QString::number(static_cast<double>(mTemp),'f',1);
     mPresence = pa->captPres->getPresence();
     QByteArray pourcentage = pa->getSDPlace();
-    bdd->setCapteurs("UPDATE pas SET temp='"+realtemp+"', Pourcentage_SD ='"+pourcentage+"', presence='"+(pa->getEtatTele()?"O":"N")+"' WHERE mac='"+mac+"';");
+    bdd->setCapteurs("UPDATE pas SET temp='"+realtemp+"', Pourcentage_SD ='"+pourcentage+"', presence='"+(pa->getEtatReelTv()?"O":"N")+"' WHERE mac='"+mac+"';");
 }
 
 void CIhm::getSlide()
@@ -286,7 +293,7 @@ void CIhm::onSigPresence(int st)
         pa->switchOffLed();
 }
 
-void CIhm::onSigPa(QString mess)
+void CIhm::onSigPaConsigne(QString mess)
 {
-    ui->lTvState->setText(mess);
+    ui->lConsigne->setText(mess);
 }
