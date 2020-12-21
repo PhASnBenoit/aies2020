@@ -17,15 +17,16 @@ CPa::CPa(QObject *parent, CBdd *bdd):
 
     emIr = new CIr(this);
 
-    mTimerU = new QTimer(this); // timer de vérif de la présence tension.
-    mTimerU->setInterval(30000);  // 30s
-    connect(mTimerU, &QTimer::timeout, this, &CPa::onTimerU);
-
     mBdd = bdd;
     mMac = getSysMacAddress();
     mNom = bdd->getNomPa(mMac);
     mZone = bdd->getNomZone(bdd->getNoZone(mMac).toInt()); // Tester simplement bdd->getNoZone(mac)
     mIdleTime = bdd->getIdleTime(mMac);
+
+    mTimerU = new QTimer(this); // timer de vérif de la présence tension.
+    mTimerU->setInterval(30000);  // 30s
+    connect(mTimerU, &QTimer::timeout, this, &CPa::onTimerU);
+    mTimerU->start();
 }
 
 CPa::~CPa()
@@ -144,7 +145,7 @@ void CPa::onTimerU()
             break;
         } // sw
     } else {
-        mTimerU->stop();
+        //mTimerU->stop(); comment au cas ou on eteint la tv
     } // else
 } // onTimerU
 
@@ -153,7 +154,7 @@ bool CPa::switchOnTv()
      QString ctrl=getCtrlTv();
      mConsigne=ALLUMER;
 
-     if (!mOrdrePassed) {
+     if (!mOrdrePassed && !getEtatReelTv()) {
          mOrdrePassed=true;
          if(ctrl == "cec") {
             ecran->putOnCec();
@@ -180,7 +181,7 @@ bool CPa::switchOffTv()
     QString ctrl=getCtrlTv();
     mConsigne = ETEINDRE;
 
-    if (!mOrdrePassed) {
+    if (!mOrdrePassed && getEtatReelTv()) {  // PhA 12/2020
         mOrdrePassed=true;
         if(ctrl == "cec") {
             ecran->putOffCec();

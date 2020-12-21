@@ -66,7 +66,8 @@ CIhm::CIhm(QWidget *parent) :
     {
         connect(timer, &QTimer::timeout, this, &CIhm::onTimerCapteurPresence); // toutes les sec
         timerNonPresence = new QTimer(this);
-        timerNonPresence->setSingleShot(true);
+        int duree = pa->getIdleTime();
+        timerNonPresence->setInterval(duree);
         connect(timerNonPresence, &QTimer::timeout, this, &CIhm::onTimerNonPresence);
     } else { // heure depart et de fin
         connect(timer, &QTimer::timeout, this, &CIhm::onTimerOpenHour);
@@ -82,7 +83,8 @@ CIhm::CIhm(QWidget *parent) :
     // affichage mode fonc et type commande écran
     ui->lModeFonc->setText(modeFonc);
     ui->lType->setText(pa->getCtrlTv());
-
+    pa->switchOnTv();  // ALLUME LA TV
+qDebug() << "[CIhm::CIhm] allume la TV";
     //Initialisation Première Slide
     ui->webViewStarter->page()->settings()->setObjectCacheCapacities(0,0,0); // suppression cache
     mCompteurSlide = 0;
@@ -138,8 +140,6 @@ void CIhm::onTimerCapteurPresence()  //  si mode presence
     if(!mPresence) { // si non présence
         if (pa->getEtatReelTv()) {
            if (!timerNonPresence->isActive()) {
-                int duree = pa->getIdleTime();
-                timerNonPresence->setInterval(duree);
                 timerNonPresence->start(); // relance durée de non présence devant l'écran
            } // if isactive
         } // if getetatreel
