@@ -1,7 +1,6 @@
 #ifndef CADAFRUIT_SGP30_H
 #define CADAFRUIT_SGP30_H
 
-#include <iostream>
 #include <QObject>
 #include "../biblis/ci2c.h"
 

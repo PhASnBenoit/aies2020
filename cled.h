@@ -4,7 +4,7 @@
 #include <QObject>
 #include "cgpio.h"
 
-#define LED 27
+#define LED 27  // GPIO27 pin 13
 
 class CLed : public QObject
 {

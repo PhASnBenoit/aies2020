@@ -14,7 +14,7 @@
 #include "cled.h"
 #include "ccapteurpres.h"
 #include "ccapteurtemp.h"
-#include "./biblis/cadafruit_sgp30.h"
+#include "cadafruit_sgp30.h"
 #include "cir.h"
 #include "cecran.h"
 
@@ -64,14 +64,16 @@ public:
     bool switchOffLed();
     bool getPresence();
     float getTemperature();
-    CCapteurPres *captPres;
-    CCapteurTemp *captTemp;
+//    CCapteurPres *captPres;
+//    CCapteurTemp *captTemp;
     CAdafruit_SGP30 *captQa;
     void calculateSDPlace();
     QByteArray getSDPlace();
     void creationCache();
     bool getConsigne() const;
     void setConsigne(bool consigne);
+    QString getQSerialNumber();  // qualité de l'air
+    QString getQuality(QString choix);
 
     CEcran *ecran;
 
@@ -99,10 +101,12 @@ private:
     bool mConsigne;
     bool mOrdrePassed;
     QByteArray mSDPlace;
+    CAdafruit_SGP30 mSgp30; // capteur qualité de l'air
 
 signals:
     void sigPresence(int st);
     void sigPaConsigne(QString mess);
+    void sigQAir(QString mess);
 
 private slots:
     void onSigPresence(int st);

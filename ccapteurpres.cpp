@@ -1,8 +1,5 @@
 #include <ccapteurpres.h>
 
-#define capt 0
-#define PRES 17
-
 CCapteurPres::CCapteurPres(QObject *parent) :
     QObject(parent)
 {

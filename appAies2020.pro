@@ -24,9 +24,12 @@ SOURCES += main.cpp\
     cpa.cpp \
     crs232c.cpp \
     ctelecommanders232samsung.cpp \
-    biblis/cadafruit_sgp30.cpp \
     biblis/ci2c.cpp \
-    cihm.cpp
+    cihm.cpp \
+    cadafruit_sgp30.cpp \
+    cthreadcapteurs.cpp \
+    ccapteurgazfumeemq_2.cpp \
+    csharedmemory.cpp
 
 HEADERS  += \
     cbdd.h \
@@ -40,9 +43,12 @@ HEADERS  += \
     cpa.h \
     crs232c.h \
     ctelecommanders232samsung.h \
-    biblis/cadafruit_sgp30.h \
     biblis/ci2c.h \
-    cihm.h
+    cihm.h \
+    cadafruit_sgp30.h \
+    cthreadcapteurs.h \
+    ccapteurgazfumeemq_2.h \
+    csharedmemory.h
 
 FORMS    += \
     cihm.ui

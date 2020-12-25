@@ -337,7 +337,7 @@ QString CBdd::getActiveFlash()
     return strFlash;
 }
 
-void CBdd::setCapteurs(QString Query)
+void CBdd::setCapteurs(QString temp, QByteArray sd, QString pres, QString mac)
 {
     if(!Aies_bdd.isOpen())
     {
@@ -345,8 +345,7 @@ void CBdd::setCapteurs(QString Query)
     }
     else
     {
-        QSqlQuery Aies_query;
-        Aies_query.exec(Query);
+        QSqlQuery Aies_query("UPDATE pas SET temp='"+temp+"', Pourcentage_SD ='"+sd+"', presence='"+pres+"' WHERE mac='"+mac+"';");
     }
 }
 

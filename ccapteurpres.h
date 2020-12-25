@@ -9,11 +9,11 @@
 
 #include "cgpio.h"
 
+#define PRES 17
+
 class CCapteurPres : public QObject
 {
-
     Q_OBJECT
-
 public:
    explicit CCapteurPres(QObject *parent = nullptr);
    ~CCapteurPres();

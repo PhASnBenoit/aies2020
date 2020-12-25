@@ -5,7 +5,6 @@ CEcran::CEcran(QObject *parent, int no) :
 {
     mNoEcran = no; // numéro de l'écran dynamique
     mProt = new CTelecommandeRs232Samsung(this, "/dev/ttyAMA0");
-    // instanciation de l'objet GPIO
     mUTv = new CGpio(UTV);
 }
 

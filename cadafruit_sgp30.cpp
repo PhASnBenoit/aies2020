@@ -186,7 +186,7 @@ bool CAdafruit_SGP30::readWordFromCommand(uint8_t command[],
   for (uint8_t i = 0; i < readlen; i++) {
     uint8_t crc = generateCRC(replybuffer + i * 3, 2);
     if (crc != replybuffer[i * 3 + 2]) {
-        std::cerr << "Erreur CRC" << std::endl;
+        qDebug() << "Erreur CRC";
         return false;
     } // if
     // success! store it
@@ -211,7 +211,7 @@ uint8_t CAdafruit_SGP30::generateCRC(uint8_t *data, uint8_t datalen) {
         crc = static_cast<uint8_t>((crc << 1) ^ SGP30_CRC8_POLYNOMIAL);
       else
         crc <<= 1;
-    }
-  }
+    } // for b
+  } // for i
   return crc;
 }

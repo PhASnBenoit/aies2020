@@ -11,6 +11,7 @@
 #include "cbdd.h"
 #include "cpa.h"
 #include "cconfig.h"
+#include "csharedmemory.h"
 
 namespace Ui {
 class CIhm;
@@ -27,6 +28,7 @@ public:
 private:
     Ui::CIhm *ui;
     CBdd *bdd;
+    CSharedMemory *shm;
     CPa *pa;
     CConfig *conf;
     QString mServeur;
@@ -62,6 +64,7 @@ private slots:
     void onTimerHeure();
     void onTimerTemperature();
     void onTimerCapteurPresence();
+    void onTimerQ();
     void onTimerNonPresence();
     void onTimerOpenHour();
     void onTimerBdd();
@@ -71,6 +74,7 @@ private slots:
     void onTimerOupsSlide();
     void onSigPresence(int st);
     void onSigPaConsigne(QString mess);
+    void onSigQAir(QString mess);
 };
 
 #endif // CIHM_H

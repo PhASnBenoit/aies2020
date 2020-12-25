@@ -11,11 +11,13 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     mEtatReelTele = ecran->getU();
     //m_etatOrdre = ORDRE_ATTENTE;
 
-    captPres = new CCapteurPres(this);
+//    captPres = new CCapteurPres(this);
     connect(captPres, &CCapteurPres::sigAffPres, this, &CPa::onSigPresence);
-    captTemp = new CCapteurTemp();
+//    captTemp = new CCapteurTemp();
 
     emIr = new CIr(this);
+    mSgp30.begin();
+    emit sigQAir(getQSerialNumber());
 
     mBdd = bdd;
     mMac = getSysMacAddress();
@@ -32,8 +34,8 @@ CPa::CPa(QObject *parent, CBdd *bdd):
 CPa::~CPa()
 {
     delete mTimerU;
-    delete captTemp;
-    delete captPres;
+//    delete captTemp;
+//    delete captPres;
     delete ecran;
     delete led;
 }
@@ -64,6 +66,61 @@ bool CPa::getConsigne() const
 void CPa::setConsigne(bool consigne)
 {
     mConsigne = consigne;
+}
+
+QString CPa::getQSerialNumber()
+{
+    return QString::number(mSgp30.serialnumber[0],16)+QString::number(mSgp30.serialnumber[1],16)+QString::number(mSgp30.serialnumber[2],16);
+}
+
+QString CPa::getQuality(QString choix)
+{
+    static int cpt=0;
+    QString chSig, chRaw, chBase;
+
+    if (! mSgp30.IAQmeasure())
+       return("Mes failed");
+    chSig = "TVOC:"+QString::number(mSgp30.TVOC)+" ppb ";
+    chSig += "eCO2:"+QString::number(mSgp30.eCO2)+" ppm";
+
+    // Signaux utilisés pour la calibration
+    if (! mSgp30.IAQmeasureRaw())
+        return("Raw failed");
+    chRaw = "Q: H2:"+QString::number(mSgp30.rawH2)+" ";
+    chRaw += "Eth:"+QString::number(mSgp30.rawEthanol);
+
+    cpt++;
+    if (cpt == 20) {
+        uint16_t TVOC_base, eCO2_base;
+        if (! mSgp30.getIAQBaseline(&eCO2_base, &TVOC_base))
+          return("Base Failed");
+        chBase = "BS: eCO2:"+QString::number(eCO2_base)+" ppm ";
+        chBase +="TVOC:"+QString::number(TVOC_base)+" ppb";
+    } // if cpt
+    if(choix=="tous")
+        switch(cpt) {
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:return chSig;
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:cpt=0;
+            return chBase;
+        default:
+            return chRaw;
+        } // sw
+    if(choix=="sig")
+        return chSig;
+    if(choix=="raw")
+        return chRaw;
+    if(choix=="base")
+        return chBase;
+return "-"; //sert à rien !
 }
 
 QString CPa::getZone()
@@ -135,18 +192,12 @@ void CPa::onTimerU()
     qDebug() << "[CPa::onTimerU] mEtatReelTele:"<<mEtatReelTele
              << " mConsigne:"<< mConsigne;
     if (mEtatReelTele != mConsigne) { // si au bout de 30s l'ordre est toujours pas exécuté
-        qDebug() << "[CPa::onTimerU]: Rappel ordre TV !";
-        switch(static_cast<int>(mConsigne)) {
-        case ALLUMER:
+        qDebug() << "[CPa::onTimerU]: Relance ordre TV !";
+        if  (mConsigne == ALLUMER)
             switchOnTv();
-            break;
-        case ETEINDRE:
+        else // ETEINDRE:
             switchOffTv();
-            break;
-        } // sw
-    } else {
-        //mTimerU->stop(); comment au cas ou on eteint la tv
-    } // else
+    } // if != consigne
 } // onTimerU
 
 bool CPa::switchOnTv()
@@ -322,8 +373,7 @@ void CPa::creationCache()
   CConfig conf;
 
   qDebug() << "Chargement du cache.";
-  for(i=0 ; i<videoSlide.size() ; i++)
-  {
+  for(i=0 ; i<videoSlide.size() ; i++) {
     QString command="scp root@"+conf.getBddHostname()+":/srv/www/htdocs"+
             conf.getHtDocs()+videoSlide.at(i)+" /opt/aies/cache/";
     qDebug() << "CPa::creationCache: " << command;
@@ -331,6 +381,5 @@ void CPa::creationCache()
     //ici nous utilisons la commande scp pour récupérer les vidéos stockées sur le serveur selon leur chemin d accès
     //qDebug() << "CPa::creationCache: Met en cache ress : " << videoSlide.at(i);
     scp.close();
-  }
-
+  } // for
 }

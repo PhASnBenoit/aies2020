@@ -135,8 +135,8 @@
    <widget class="QLabel" name="lbHeure">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>910</y>
+      <x>220</x>
+      <y>879</y>
       <width>51</width>
       <height>41</height>
      </rect>
@@ -162,8 +162,8 @@
    <widget class="QLabel" name="lbPoints">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>910</y>
+      <x>270</x>
+      <y>879</y>
       <width>10</width>
       <height>41</height>
      </rect>
@@ -184,7 +184,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>950</y>
+      <y>919</y>
       <width>101</width>
       <height>51</height>
      </rect>
@@ -205,7 +205,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>950</y>
+      <y>919</y>
       <width>41</width>
       <height>51</height>
      </rect>
@@ -225,8 +225,8 @@
    <widget class="QLabel" name="lbMinute">
     <property name="geometry">
      <rect>
-      <x>270</x>
-      <y>910</y>
+      <x>280</x>
+      <y>879</y>
       <width>51</width>
       <height>41</height>
      </rect>
@@ -253,9 +253,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>900</y>
-      <width>141</width>
-      <height>121</height>
+      <y>879</y>
+      <width>131</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="text">
@@ -271,9 +271,9 @@
    <widget class="QLabel" name="lPa">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>1030</y>
-      <width>111</width>
+      <x>20</x>
+      <y>850</y>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -287,9 +287,9 @@
    <widget class="QLabel" name="lZone">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>1030</y>
-      <width>111</width>
+      <x>190</x>
+      <y>850</y>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -303,9 +303,9 @@
    <widget class="QLabel" name="lTvState">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>1030</y>
-      <width>71</width>
+      <x>160</x>
+      <y>970</y>
+      <width>91</width>
       <height>21</height>
      </rect>
     </property>
@@ -319,9 +319,9 @@
    <widget class="QLabel" name="lVersion">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>1030</y>
-      <width>31</width>
+      <width>41</width>
       <height>21</height>
      </rect>
     </property>
@@ -335,9 +335,9 @@
    <widget class="QLabel" name="lInfoFlash">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>360</x>
       <y>860</y>
-      <width>1561</width>
+      <width>1551</width>
       <height>221</height>
      </rect>
     </property>
@@ -354,7 +354,7 @@
      <string notr="true">font: 25 36pt &quot;Roboto&quot;;</string>
     </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;style&gt; h3 {background-color:red;} h3{color:white;}&lt;/style&gt;&lt;h3&gt;TEST&lt;/h3&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;style&gt; h3 {background-color:red;} h3{color:white;}&lt;/style&gt;&lt;h3&gt;TEST&lt;BR&gt;TEST&lt;/h3&gt;&lt;/html&gt;</string>
     </property>
     <property name="textFormat">
      <enum>Qt::RichText</enum>
@@ -369,8 +369,8 @@
    <widget class="QLabel" name="lLogoPres">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>900</y>
+      <x>160</x>
+      <y>880</y>
       <width>31</width>
       <height>31</height>
      </rect>
@@ -388,8 +388,8 @@
    <widget class="QLabel" name="lLogoIr">
     <property name="geometry">
      <rect>
-      <x>330</x>
-      <y>890</y>
+      <x>160</x>
+      <y>930</y>
       <width>16</width>
       <height>21</height>
      </rect>
@@ -422,9 +422,9 @@
    <widget class="QLabel" name="lModeFonc">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>1010</y>
-      <width>101</width>
+      <x>190</x>
+      <y>1030</y>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -435,9 +435,9 @@
    <widget class="QLabel" name="lType">
     <property name="geometry">
      <rect>
-      <x>167</x>
-      <y>1010</y>
-      <width>61</width>
+      <x>90</x>
+      <y>1030</y>
+      <width>81</width>
       <height>21</height>
      </rect>
     </property>
@@ -448,14 +448,40 @@
    <widget class="QLabel" name="lConsigne">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>1051</y>
-      <width>68</width>
+      <x>257</x>
+      <y>970</y>
+      <width>91</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>NC</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lQa">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>1000</y>
+      <width>331</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>---</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <zorder>lbHeure</zorder>
@@ -475,6 +501,7 @@
    <zorder>lType</zorder>
    <zorder>lLogo</zorder>
    <zorder>lConsigne</zorder>
+   <zorder>lQa</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

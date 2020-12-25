@@ -16,9 +16,11 @@ CIhm::CIhm(QWidget *parent) :
     // Initialisation des objets
     mUpdate=false;
     bdd = new CBdd();
+    shm = new CSharedMemory(this);
     pa = new CPa(this, bdd);
     connect(pa, &CPa::sigPresence, this, &CIhm::onSigPresence); // aff * presence
     connect(pa, &CPa::sigPaConsigne, this, &CIhm::onSigPaConsigne);  // aff on/off tv
+    connect(pa, &CPa::sigQAir, this, &CIhm::onSigQAir);  // aff serial numb Q air
     conf = new CConfig();
     mPresence = false;
     mPriorSwap=false;
@@ -46,7 +48,6 @@ CIhm::CIhm(QWidget *parent) :
     connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerHeure);  // affichage de l'heure
     connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerTemperature); // affichage température
     connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
-    //connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerBdd); // mise à jour du logiciel
 
     // Timer Slide
     timerSlide = new QTimer(); // changement de  slide
@@ -59,6 +60,7 @@ CIhm::CIhm(QWidget *parent) :
     timer = new QTimer();
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerFlash);  // affichage de l'info flash
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerBdd); // sauve temp, presence, capcite SD dans bdd
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerQ); // qualité de l'air
 
     // Timer d'intervale d'absence
     QString modeFonc = pa->getModeFonc();
@@ -102,6 +104,7 @@ CIhm::~CIhm()
     delete maj;
     delete flash;
     delete pa;
+    delete shm;
     delete bdd;
     delete conf;
     delete ui;
@@ -152,6 +155,13 @@ void CIhm::onTimerCapteurPresence()  //  si mode presence
            pa->switchOnTv();
        } // if getEtat
     } // else presence
+}
+
+void CIhm::onTimerQ()
+{
+    QString ch = pa->getQuality("tous");
+    ui->lQa->setText(ch);
+    qDebug() << "[CIhm::onTimerQ] Qualité de l'air : " << ch;
 } // onTimerCapteur
 
 void CIhm::onTimerNonPresence()   // seulement si mode présence et personne devant depuis x mn
@@ -188,7 +198,7 @@ void CIhm::onTimerBdd()  // toutes les secs
     QString realtemp = QString::number(static_cast<double>(mTemp),'f',1);
     mPresence = pa->captPres->getPresence();
     QByteArray pourcentage = pa->getSDPlace();
-    bdd->setCapteurs("UPDATE pas SET temp='"+realtemp+"', Pourcentage_SD ='"+pourcentage+"', presence='"+(pa->getEtatReelTv()?"O":"N")+"' WHERE mac='"+mac+"';");
+    bdd->setCapteurs(realtemp, pourcentage, (pa->getEtatReelTv()?"O":"N"), mac);
 }
 
 void CIhm::getSlide()
@@ -199,7 +209,7 @@ void CIhm::getSlide()
     bdd->setSliderUpdate(pa->getDateTime()); // met à jour le champ state à actif ou arch pour tous les PA
     mTabSlides = bdd->getActiveSlides(mac); // uniquement celles pour le PA
     qDebug() << "CIhm::getSlide Nbe de diapo : " << mTabSlides.size();
-    mUrgencyState = pa->getUrgency();
+    //mUrgencyState = pa->getUrgency();
     affSlide();
 }
 
@@ -302,4 +312,9 @@ void CIhm::onSigPresence(int st)
 void CIhm::onSigPaConsigne(QString mess)
 {
     ui->lConsigne->setText(mess);
+}
+
+void CIhm::onSigQAir(QString mess)
+{
+    ui->lQa->setText(mess);
 }
