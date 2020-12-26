@@ -13,7 +13,7 @@ CIr::~CIr()
 
 void CIr::irOnOff()
 {
-    QProcess::execute("irsend SEND_ONCE SAMSUNG KEY_POWER"); // Commande utilisation de la télécommande virtuel lire
+    QProcess::startDetached("irsend", QStringList() << "SEND_ONCE SAMSUNG KEY_POWER"); // Commande utilisation de la télécommande virtuel lire
 }
 
 

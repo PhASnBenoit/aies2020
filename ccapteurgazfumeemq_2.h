@@ -13,7 +13,7 @@ class CCapteurGazFumeeMQ_2: public QObject
 public:
     explicit CCapteurGazFumeeMQ_2(QObject *parent = nullptr);
     ~CCapteurGazFumeeMQ_2();
-    bool lireCapteur();
+    bool getCapteur();
 
 private:
     CGpio *gpioCF;

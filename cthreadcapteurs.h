@@ -8,6 +8,7 @@
 #include "csharedmemory.h"
 #include "ccapteurpres.h"
 #include "ccapteurtemp.h"
+#include "ccapteurgazfumeemq_2.h"
 #include "cadafruit_sgp30.h"
 
 class CThreadCapteurs : public QObject
@@ -22,7 +23,9 @@ private:
     QTimer *tmr;
     CCapteurPres *captPres;
     CCapteurTemp *captTemp;
+    CCapteurGazFumeeMQ_2 *captFumee;
     CAdafruit_SGP30 *captQa;
+
 signals:
 
 public slots:

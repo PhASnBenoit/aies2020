@@ -7,27 +7,27 @@ CIhm::CIhm(QWidget *parent) :
 {
     // initialisation IHM
     ui->setupUi(this);
-    ui->lLogoIr->setVisible(false);
+    ui->lLogoIr->setVisible(false); // futur ???
     ui->lLogoPres->setVisible(true); // par défaut
     QPixmap logoPath("/opt/aies/logoLAB.png");
     QPixmap logoPath1("/opt/aies/presence1.png");
     QApplication::setOverrideCursor(QCursor(Qt::BlankCursor));  // Rend invisible le curseur
 
     // Initialisation des objets
-    mUpdate=false;
+    mUpdate=false;  // maj appli
+    conf = new CConfig();
     bdd = new CBdd();
     shm = new CSharedMemory(this);
-    pa = new CPa(this, bdd);
+    pa = new CPa(this, bdd); // lance aussi le thread capteurs
     connect(pa, &CPa::sigPresence, this, &CIhm::onSigPresence); // aff * presence
     connect(pa, &CPa::sigPaConsigne, this, &CIhm::onSigPaConsigne);  // aff on/off tv
     connect(pa, &CPa::sigQAir, this, &CIhm::onSigQAir);  // aff serial numb Q air
-    conf = new CConfig();
-    mPresence = false;
+
+    mPresence = shm->getCapteurPresence();
     mPriorSwap=false;
     mPrior=false;  // Pas de dispo prioritaire
     mVer = conf->getNumVersion();
     mServeur = conf->getBddHostname();
-
     mac = pa->getMac();  // Stockage de l'adresse MAC dans une variable global
     currentName = pa->getNom();   // Acquisition nom de la Rpi par l'adresse MAC
 
@@ -43,12 +43,6 @@ CIhm::CIhm(QWidget *parent) :
     // timer surveillance capacité de la SD
     timerCapaSd = new QTimer();
 
-    // timer 30s pour horloge et température
-    timerAffHeureTempMaj = new QTimer();
-    connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerHeure);  // affichage de l'heure
-    connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerTemperature); // affichage température
-    connect(timerAffHeureTempMaj, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
-
     // Timer Slide
     timerSlide = new QTimer(); // changement de  slide
     connect(timerSlide, &QTimer::timeout, this, &CIhm::onTimerSlide);
@@ -60,7 +54,8 @@ CIhm::CIhm(QWidget *parent) :
     timer = new QTimer();
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerFlash);  // affichage de l'info flash
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerBdd); // sauve temp, presence, capcite SD dans bdd
-    connect(timer, &QTimer::timeout, this, &CIhm::onTimerQ); // qualité de l'air
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerAff); // affichages
+    connect(timer, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
 
     // Timer d'intervale d'absence
     QString modeFonc = pa->getModeFonc();
@@ -75,11 +70,7 @@ CIhm::CIhm(QWidget *parent) :
         connect(timer, &QTimer::timeout, this, &CIhm::onTimerOpenHour);
     }
 
-    onTimerHeure();  // premier affichage de l'heure
-    onTimerTemperature();
-
     timer->start(1000); // Timer général 1s
-    timerAffHeureTempMaj->start(30000);  //30s
     timerCapaSd->start(300000);  // 5mn
 
     // affichage mode fonc et type commande écran
@@ -96,7 +87,6 @@ qDebug() << "[CIhm::CIhm] allume la TV";
 CIhm::~CIhm()
 {
     delete timer;
-    delete timerAffHeureTempMaj;
     delete timerCapaSd;
     delete timerNonPresence;
     delete timerSlide;
@@ -108,31 +98,6 @@ CIhm::~CIhm()
     delete bdd;
     delete conf;
     delete ui;
-}
-
-// Récupere l'heure actuel
-void CIhm::onTimerHeure()
-{
-    QTime Heure;
-    Heure = QTime::currentTime();
-
-    if (ui->lbPoints->isVisible())
-        ui->lbPoints->setVisible(false);    //
-    else                                    // clignotement des 2 points de l'heure
-        ui->lbPoints->setVisible(true);     //
-
-    ui->lbHeure->setText(Heure.toString("hh"));     // affiche l'heure
-    ui->lbMinute->setText(Heure.toString("mm"));    // affiche les minutes
-}
-
-// Affiche la temperature
-void CIhm::onTimerTemperature()
-{
-      float temp = pa->getTemperature();
-      if ( (temp<-99) || (temp>99))
-           this->ui->lbTemp->setText("Def !");
-      else
-           this->ui->lbTemp->setText(QString::number(static_cast<double>(temp)));
 }
 
 // Gestion présence
@@ -157,12 +122,30 @@ void CIhm::onTimerCapteurPresence()  //  si mode presence
     } // else presence
 }
 
-void CIhm::onTimerQ()
+void CIhm::onTimerAff()
 {
+    // heure
+    QTime Heure;
+    Heure = QTime::currentTime();
+    if (ui->lbPoints->isVisible())
+        ui->lbPoints->setVisible(false);    //
+    else                                    // clignotement des 2 points de l'heure
+        ui->lbPoints->setVisible(true);     //
+    ui->lbHeure->setText(Heure.toString("hh"));     // affiche l'heure
+    ui->lbMinute->setText(Heure.toString("mm"));
+    // Température
+    ui->lbTemp->setText(QString::number(static_cast<double>(shm->getMesTemp())));
+    // Fumée
+    if (shm->getCapteurGazFumee())
+        ui->lFumee->setVisible(true);
+    else
+        ui->lFumee->setVisible(false);
+    // qualité air
     QString ch = pa->getQuality("tous");
     ui->lQa->setText(ch);
-    qDebug() << "[CIhm::onTimerQ] Qualité de l'air : " << ch;
-} // onTimerCapteur
+    qDebug() << "[CIhm::onTimerAff] Affichages ";
+
+}
 
 void CIhm::onTimerNonPresence()   // seulement si mode présence et personne devant depuis x mn
 {
@@ -194,9 +177,9 @@ void CIhm::onTimerBdd()  // toutes les secs
 
 //    ui->lConsigne->setText((pa->getConsigne()?"TV-ON":"TV-OFF"));
 
-    mTemp = pa->captTemp->getTemp();
+    mTemp = shm->getMesTemp();
     QString realtemp = QString::number(static_cast<double>(mTemp),'f',1);
-    mPresence = pa->captPres->getPresence();
+    mPresence = shm->getCapteurPresence();
     QByteArray pourcentage = pa->getSDPlace();
     bdd->setCapteurs(realtemp, pourcentage, (pa->getEtatReelTv()?"O":"N"), mac);
 }

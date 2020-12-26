@@ -12,9 +12,6 @@
 
 #include "cbdd.h"
 #include "cled.h"
-#include "ccapteurpres.h"
-#include "ccapteurtemp.h"
-#include "cadafruit_sgp30.h"
 #include "cir.h"
 #include "cecran.h"
 
@@ -26,12 +23,6 @@
 #define ALLUMED 1
 #define ETEINT 0
 
-/*
-// etat d'un ordre à l'écran. améliorer en mettant enum
-#define ORDRE_ATTENTE 0
-#define ORDRE_EN_COURS 1 // un ordre est émis, attente retour alim via USB
-#define ORDRE_PASSED 2  // l'ordre n'a pas été compris par l'écran
-*/
 class CPa: public QObject
 {
        Q_OBJECT
@@ -64,9 +55,6 @@ public:
     bool switchOffLed();
     bool getPresence();
     float getTemperature();
-//    CCapteurPres *captPres;
-//    CCapteurTemp *captTemp;
-    CAdafruit_SGP30 *captQa;
     void calculateSDPlace();
     QByteArray getSDPlace();
     void creationCache();
@@ -74,11 +62,9 @@ public:
     void setConsigne(bool consigne);
     QString getQSerialNumber();  // qualité de l'air
     QString getQuality(QString choix);
-
     CEcran *ecran;
 
 private:
-
     CIr *emIr;
     CLed *led;
     QString mZone;
@@ -101,7 +87,6 @@ private:
     bool mConsigne;
     bool mOrdrePassed;
     QByteArray mSDPlace;
-    CAdafruit_SGP30 mSgp30; // capteur qualité de l'air
 
 signals:
     void sigPresence(int st);
@@ -109,7 +94,6 @@ signals:
     void sigQAir(QString mess);
 
 private slots:
-    void onSigPresence(int st);
     void onTimerU();
 };
 

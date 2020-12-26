@@ -5,19 +5,11 @@ CPa::CPa(QObject *parent, CBdd *bdd):
 {
     led = new CLed(this);
     ecran = new CEcran(this);
+    emIr = new CIr(this);
 
     mConsigne = ALLUMER;
     mOrdrePassed=false;
     mEtatReelTele = ecran->getU();
-    //m_etatOrdre = ORDRE_ATTENTE;
-
-//    captPres = new CCapteurPres(this);
-    connect(captPres, &CCapteurPres::sigAffPres, this, &CPa::onSigPresence);
-//    captTemp = new CCapteurTemp();
-
-    emIr = new CIr(this);
-    mSgp30.begin();
-    emit sigQAir(getQSerialNumber());
 
     mBdd = bdd;
     mMac = getSysMacAddress();
@@ -34,15 +26,8 @@ CPa::CPa(QObject *parent, CBdd *bdd):
 CPa::~CPa()
 {
     delete mTimerU;
-//    delete captTemp;
-//    delete captPres;
     delete ecran;
     delete led;
-}
-
-void CPa::onSigPresence(int st)
-{
-    emit sigPresence(st);
 }
 
 // Récupére l'adresse mac de la carte
@@ -99,20 +84,9 @@ QString CPa::getQuality(QString choix)
     } // if cpt
     if(choix=="tous")
         switch(cpt) {
-        case 10:
-        case 11:
-        case 12:
-        case 13:
-        case 14:return chSig;
-        case 15:
-        case 16:
-        case 17:
-        case 18:
-        case 19:
-        case 20:cpt=0;
-            return chBase;
-        default:
-            return chRaw;
+        case 10:case 11:case 12:case 13:case 14:return chSig;
+        case 15:case 16:case 17:case 18:case 19:case 20:cpt=0; return chBase;
+        default:return chRaw;
         } // sw
     if(choix=="sig")
         return chSig;
@@ -267,13 +241,13 @@ bool CPa::switchOffLed()
 
 bool CPa::getPresence()
 {
-    return captPres->getPresence();
+//    return captPres->getPresence();
 }
 
 float CPa::getTemperature()
 {
-    float temp = captTemp->getTemp();
-    return temp;
+//    float temp = captTemp->getTemp();
+//    return temp;
 }
 
 int CPa::getIdleTime()

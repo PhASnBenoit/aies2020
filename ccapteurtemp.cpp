@@ -28,7 +28,7 @@ float CCapteurTemp::getTemp()
                  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
                  {
                      qDebug() << "[CCapteur::getTemp]: Ouverture du fichier impossible";
-                     return -99.99L;
+                     return -99.99F;
                  }
                  else
                  {
@@ -37,7 +37,7 @@ float CCapteurTemp::getTemp()
                      {
                          QString line = in.readLine();
                          if (line.contains("NO"))
-                             return -99.99;
+                             return -99.99F;
                          int pos;
                          if ( (pos=line.indexOf("t=")) > 1)
                          {
@@ -50,5 +50,5 @@ float CCapteurTemp::getTemp()
              } // if prefixe
          } // if symbolic
     } // for
-    return -99.99L;
+    return -99.99F;
 }

@@ -11,7 +11,7 @@ CCapteurGazFumeeMQ_2::~CCapteurGazFumeeMQ_2()
     delete gpioCF;
 }
 
-bool CCapteurGazFumeeMQ_2::lireCapteur()
+bool CCapteurGazFumeeMQ_2::getCapteur()
 {
     int val = gpioCF->lire();
     qDebug() << "[CCapteurGazFumeeMQ_2::lireCapteur] Fumée="<<val;

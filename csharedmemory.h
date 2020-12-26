@@ -8,10 +8,10 @@
 #define KEY "./aies.ini"
 
 typedef struct s_capteurs {
-    int mesH2;
-    int mesEthanol;
-    int mesRawTVOC;
-    int mesRawECO2;
+    int mesTVOC;
+    int mesECO2;
+    int mesRawH2;
+    int mesRawEthanol;
     int mesBaselineTVOC;
     int mesBaselineECO2;
     bool capteurGazFumee;
@@ -25,20 +25,20 @@ class CSharedMemory : public QObject
 public:
     explicit CSharedMemory(QObject *parent = nullptr);
     ~CSharedMemory();
-    int getMesH2() const;
-    int getMesEthanol() const;
-    int getMesRawTVOC() const;
-    int getMesRawECO2() const;
+    int getMesTVOC() const;
+    int getMesECO2() const;
+    int getMesRawH2() const;
+    int getMesRawEthanol() const;
     int getMesBaselineTVOC() const;
     int getMesBaselineECO2() const;
     bool getCapteurGazFumee() const;
     bool getCapteurPresence() const;
     float getMesTemp() const;
 
-    void setMesH2(int val) const;
-    void setMesEthanol(int val) const;
-    void setMesRawTVOC(int val) const;
-    void setMesRawECO2(int val) const;
+    void setMesTVOC(int val) const;
+    void setMesECO2(int val) const;
+    void setMesRawH2(int val) const;
+    void setMesRawEthanol(int val) const;
     void setMesBaselineTVOC(int val) const;
     void setMesBaselineECO2(int val) const;
     void setCapteurGazFumee(bool val) const;

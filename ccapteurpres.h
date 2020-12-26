@@ -9,7 +9,7 @@
 
 #include "cgpio.h"
 
-#define PRES 17
+#define PRES 17  // GPIO17
 
 class CCapteurPres : public QObject
 {
@@ -20,9 +20,6 @@ public:
    bool getPresence();
 private:
    CGpio *mPres;
-   int varState;
-signals:
-   void sigAffPres(int);
 };
 
 #endif // CCAPTEURPRES_H
