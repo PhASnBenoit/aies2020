@@ -7,6 +7,13 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     ecran = new CEcran(this);
     emIr = new CIr(this);
 
+    thCapt = new CThreadCapteurs();
+    thCapt->moveToThread(&th);
+    connect(&th, &QThread::finished, thCapt, &CThreadCapteurs::deleteLater);
+    connect(this, &CPa::sigGo, thCapt, &CThreadCapteurs::go);
+    th.start();    // lance l'execution du thread
+    emit sigGo();  // lance la lecture des capteurs dans le thread
+
     mConsigne = ALLUMER;
     mOrdrePassed=false;
     mEtatReelTele = ecran->getU();
@@ -25,6 +32,8 @@ CPa::CPa(QObject *parent, CBdd *bdd):
 
 CPa::~CPa()
 {
+    th.quit();
+    th.wait();
     delete mTimerU;
     delete ecran;
     delete led;
@@ -52,51 +61,14 @@ void CPa::setConsigne(bool consigne)
 {
     mConsigne = consigne;
 }
-
+/*
 QString CPa::getQSerialNumber()
 {
     return QString::number(mSgp30.serialnumber[0],16)+QString::number(mSgp30.serialnumber[1],16)+QString::number(mSgp30.serialnumber[2],16);
 }
 
-QString CPa::getQuality(QString choix)
-{
-    static int cpt=0;
-    QString chSig, chRaw, chBase;
 
-    if (! mSgp30.IAQmeasure())
-       return("Mes failed");
-    chSig = "TVOC:"+QString::number(mSgp30.TVOC)+" ppb ";
-    chSig += "eCO2:"+QString::number(mSgp30.eCO2)+" ppm";
-
-    // Signaux utilisés pour la calibration
-    if (! mSgp30.IAQmeasureRaw())
-        return("Raw failed");
-    chRaw = "Q: H2:"+QString::number(mSgp30.rawH2)+" ";
-    chRaw += "Eth:"+QString::number(mSgp30.rawEthanol);
-
-    cpt++;
-    if (cpt == 20) {
-        uint16_t TVOC_base, eCO2_base;
-        if (! mSgp30.getIAQBaseline(&eCO2_base, &TVOC_base))
-          return("Base Failed");
-        chBase = "BS: eCO2:"+QString::number(eCO2_base)+" ppm ";
-        chBase +="TVOC:"+QString::number(TVOC_base)+" ppb";
-    } // if cpt
-    if(choix=="tous")
-        switch(cpt) {
-        case 10:case 11:case 12:case 13:case 14:return chSig;
-        case 15:case 16:case 17:case 18:case 19:case 20:cpt=0; return chBase;
-        default:return chRaw;
-        } // sw
-    if(choix=="sig")
-        return chSig;
-    if(choix=="raw")
-        return chRaw;
-    if(choix=="base")
-        return chBase;
-return "-"; //sert à rien !
-}
-
+*/
 QString CPa::getZone()
 {
     return mZone;
@@ -172,7 +144,7 @@ void CPa::onTimerU()
         else // ETEINDRE:
             switchOffTv();
     } // if != consigne
-} // onTimerU
+}
 
 bool CPa::switchOnTv()
 {
@@ -238,7 +210,7 @@ bool CPa::switchOffLed()
     return led->ledOff();
 }
 
-
+/*
 bool CPa::getPresence()
 {
 //    return captPres->getPresence();
@@ -249,7 +221,7 @@ float CPa::getTemperature()
 //    float temp = captTemp->getTemp();
 //    return temp;
 }
-
+*/
 int CPa::getIdleTime()
 {
     return mIdleTime;

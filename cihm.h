@@ -27,6 +27,7 @@ public:
 
 private:
     Ui::CIhm *ui;
+
     CBdd *bdd;
     CSharedMemory *shm;
     CPa *pa;
@@ -59,9 +60,9 @@ private:
     bool mPresence;
     void getSlide();
     void affSlide();
+    void affQuality(QString choix);
 
 private slots:
-    void onTimerHeure();
     void onTimerCapteurPresence();
     void onTimerAff();
     void onTimerNonPresence();

@@ -9,11 +9,13 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QFile>
+#include <QThread>
 
 #include "cbdd.h"
 #include "cled.h"
 #include "cir.h"
 #include "cecran.h"
+#include "cthreadcapteurs.h"
 
 // Consignes des ordres ECRAN
 #define ALLUMER 1
@@ -53,15 +55,15 @@ public:
     bool switchOffTv();
     bool switchOnLed();
     bool switchOffLed();
-    bool getPresence();
-    float getTemperature();
+    //bool getPresence();
+    //float getTemperature();
     void calculateSDPlace();
     QByteArray getSDPlace();
     void creationCache();
     bool getConsigne() const;
     void setConsigne(bool consigne);
-    QString getQSerialNumber();  // qualité de l'air
-    QString getQuality(QString choix);
+    //QString getQSerialNumber();  // qualité de l'air
+    //QString getQuality(QString choix);
     CEcran *ecran;
 
 private:
@@ -87,11 +89,14 @@ private:
     bool mConsigne;
     bool mOrdrePassed;
     QByteArray mSDPlace;
+    QThread th;
+    CThreadCapteurs *thCapt;
 
 signals:
     void sigPresence(int st);
     void sigPaConsigne(QString mess);
     void sigQAir(QString mess);
+    void sigGo();
 
 private slots:
     void onTimerU();

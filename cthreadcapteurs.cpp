@@ -12,6 +12,7 @@ CThreadCapteurs::CThreadCapteurs(QObject *parent) : QObject(parent)
     captFumee = new CCapteurGazFumeeMQ_2(this);
     captQa = new CAdafruit_SGP30();
     captQa->begin();
+    qDebug() << "[CThreadCapteurs::CThreadCapteurs] Thread lancé";
 }
 
 CThreadCapteurs::~CThreadCapteurs()
