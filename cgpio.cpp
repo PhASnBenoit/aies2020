@@ -19,7 +19,7 @@ int CGpio::init()
     QString command = "sudo chmod -R 777 "+QString(mFilename);
     QProcess *proc= new QProcess(this);
     proc->start(command);
-    sleep(1);
+    //sleep(1);
     return 1;
 }
 

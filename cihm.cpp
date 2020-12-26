@@ -104,19 +104,20 @@ CIhm::~CIhm()
 void CIhm::onTimerCapteurPresence()  //  si mode presence
 {
     mPresence = shm->getCapteurPresence();
-    qDebug() << "[CIhm::onTimerCapteur] mPresence="<<mPresence;
+//    qDebug() << "[CIhm::onTimerCapteurPresence] mPresence="<<mPresence;
     if(!mPresence) { // si non présence
-        if (pa->getEtatReelTv()) {
+        if (shm->getCapteurUTv()) { // si TV allumée
            if (!timerNonPresence->isActive()) {
                 timerNonPresence->start(); // relance durée de non présence devant l'écran
            } // if isactive
         } // if getetatreel
     } else { // si présence
-       qDebug() << "[CIhm::onTimerCapteur] Détection présence.";
+//       qDebug() << "[CIhm::onTimerCapteurPresence] Détection présence.";
        if (timerNonPresence->isActive()) {
            timerNonPresence->stop();
        } // isactive
-       if (!pa->getEtatReelTv()) {
+       pa->setConsigne(ALLUMER);
+       if (!shm->getCapteurUTv()) {
            pa->switchOnTv();
        } // if getEtat
     } // else presence
@@ -133,22 +134,23 @@ void CIhm::onTimerAff()
         ui->lbPoints->setVisible(true);     //
     ui->lbHeure->setText(Heure.toString("hh"));     // affiche l'heure
     ui->lbMinute->setText(Heure.toString("mm"));
+    // U TV
+    ui->lTvState->setText((shm->getCapteurUTv()?"TV-ON":"TV-OFF"));
+    // présence
+    ui->lLogoPres->setVisible(shm->getCapteurPresence());
     // Température
     ui->lbTemp->setText(QString::number(static_cast<double>(shm->getMesTemp())));
     // Fumée
-    if (shm->getCapteurGazFumee())
-        ui->lFumee->setVisible(true);
-    else
-        ui->lFumee->setVisible(false);
+    ui->lFumee->setVisible(shm->getCapteurGazFumee());
     // qualité air
     affQuality("tous");
-    qDebug() << "[CIhm::onTimerAff] Affichages ";
-
+//    qDebug() << "[CIhm::onTimerAff] Affichages ";
 }
+
 void CIhm::affQuality(QString choix)
 {
     static int cpt=0;
-
+    cpt++;
     if(choix=="tous")
         switch(cpt) {
         case 10:case 11:case 12:case 13:case 14:
@@ -200,17 +202,11 @@ void CIhm::onTimerOpenHour()  // seulement si mode heure depart et fin
 // Ecrire les données capteurs dans la Bdd
 void CIhm::onTimerBdd()  // toutes les secs
 {
-    bool u=pa->ecran->getU();
-    pa->setEtatReelTv(u);
-    ui->lTvState->setText((u?"TV-ON":"TV-OFF"));
-
-//    ui->lConsigne->setText((pa->getConsigne()?"TV-ON":"TV-OFF"));
-
+    bool u=shm->getCapteurUTv();
     mTemp = shm->getMesTemp();
     QString realtemp = QString::number(static_cast<double>(mTemp),'f',1);
-    mPresence = shm->getCapteurPresence();
     QByteArray pourcentage = pa->getSDPlace();
-    bdd->setCapteurs(realtemp, pourcentage, (pa->getEtatReelTv()?"O":"N"), mac);
+    bdd->setCapteurs(realtemp, pourcentage, (u?"O":"N"), mac);
 }
 
 void CIhm::getSlide()

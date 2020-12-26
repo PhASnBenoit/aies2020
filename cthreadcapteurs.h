@@ -10,6 +10,7 @@
 #include "ccapteurtemp.h"
 #include "ccapteurgazfumeemq_2.h"
 #include "cadafruit_sgp30.h"
+#include "cutv.h"
 
 class CThreadCapteurs : public QObject
 {
@@ -25,6 +26,7 @@ private:
     CCapteurTemp *captTemp;
     CCapteurGazFumeeMQ_2 *captFumee;
     CAdafruit_SGP30 *captQa;
+    CUTv *utv;
 
 signals:
 

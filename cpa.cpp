@@ -6,6 +6,7 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     led = new CLed(this);
     ecran = new CEcran(this);
     emIr = new CIr(this);
+    shm = new CSharedMemory();
 
     thCapt = new CThreadCapteurs();
     thCapt->moveToThread(&th);
@@ -16,8 +17,7 @@ CPa::CPa(QObject *parent, CBdd *bdd):
 
     mConsigne = ALLUMER;
     mOrdrePassed=false;
-    mEtatReelTele = ecran->getU();
-
+    mEtatReelTele = shm->getCapteurUTv();
     mBdd = bdd;
     mMac = getSysMacAddress();
     mNom = bdd->getNomPa(mMac);
@@ -37,6 +37,7 @@ CPa::~CPa()
     delete mTimerU;
     delete ecran;
     delete led;
+    delete shm;
 }
 
 // Récupére l'adresse mac de la carte
@@ -135,9 +136,9 @@ void CPa::switchDiffToPerma()
 void CPa::onTimerU()
 {
     mOrdrePassed=false;
-    qDebug() << "[CPa::onTimerU] mEtatReelTele:"<<mEtatReelTele
+    qDebug() << "[CPa::onTimerU] mEtatReelTele:"<<shm->getCapteurUTv()
              << " mConsigne:"<< mConsigne;
-    if (mEtatReelTele != mConsigne) { // si au bout de 30s l'ordre est toujours pas exécuté
+    if (shm->getCapteurUTv() != mConsigne) { // si au bout de 30s l'ordre est toujours pas exécuté
         qDebug() << "[CPa::onTimerU]: Relance ordre TV !";
         if  (mConsigne == ALLUMER)
             switchOnTv();
@@ -151,7 +152,7 @@ bool CPa::switchOnTv()
      QString ctrl=getCtrlTv();
      mConsigne=ALLUMER;
 
-     if (!mOrdrePassed && !getEtatReelTv()) {
+     if (!mOrdrePassed && !shm->getCapteurUTv()) {
          mOrdrePassed=true;
          if(ctrl == "cec") {
             ecran->putOnCec();
@@ -178,7 +179,7 @@ bool CPa::switchOffTv()
     QString ctrl=getCtrlTv();
     mConsigne = ETEINDRE;
 
-    if (!mOrdrePassed && getEtatReelTv()) {  // PhA 12/2020
+    if (!mOrdrePassed && shm->getCapteurUTv()) {  // PhA 12/2020
         mOrdrePassed=true;
         if(ctrl == "cec") {
             ecran->putOffCec();
@@ -210,18 +211,6 @@ bool CPa::switchOffLed()
     return led->ledOff();
 }
 
-/*
-bool CPa::getPresence()
-{
-//    return captPres->getPresence();
-}
-
-float CPa::getTemperature()
-{
-//    float temp = captTemp->getTemp();
-//    return temp;
-}
-*/
 int CPa::getIdleTime()
 {
     return mIdleTime;

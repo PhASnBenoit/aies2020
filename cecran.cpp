@@ -5,20 +5,14 @@ CEcran::CEcran(QObject *parent, int no) :
 {
     mNoEcran = no; // numéro de l'écran dynamique
     mProt = new CTelecommandeRs232Samsung(this, "/dev/ttyAMA0");
-    mUTv = new CGpio(UTV);
 }
 
 CEcran::~CEcran()
 {
-    delete mUTv;
     delete mProt;
 }
 
-bool CEcran::getU()
-{
-  mValU = mUTv->lire();
-  return mValU;
-}
+
 
 int CEcran::putOnCec()
 {

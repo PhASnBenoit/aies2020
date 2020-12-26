@@ -17,6 +17,7 @@ typedef struct s_capteurs {
     bool capteurGazFumee;
     bool capteurPresence;
     float mesTemp;
+    bool capteurUTv;
 } T_CAPTEURS;
 
 class CSharedMemory : public QObject
@@ -34,19 +35,22 @@ public:
     bool getCapteurGazFumee() const;
     bool getCapteurPresence() const;
     float getMesTemp() const;
+    bool getCapteurUTv() const;
 
-    void setMesTVOC(int val) const;
-    void setMesECO2(int val) const;
-    void setMesRawH2(int val) const;
-    void setMesRawEthanol(int val) const;
-    void setMesBaselineTVOC(int val) const;
-    void setMesBaselineECO2(int val) const;
-    void setCapteurGazFumee(bool val) const;
-    void setCapteurPresence(bool val) const;
-    void setMesTemp(float val) const;
+    void setMesTVOC(int val);
+    void setMesECO2(int val);
+    void setMesRawH2(int val);
+    void setMesRawEthanol(int val);
+    void setMesBaselineTVOC(int val);
+    void setMesBaselineECO2(int val);
+    void setCapteurGazFumee(bool val);
+    void setCapteurPresence(bool val);
+    void setMesTemp(float val);
+    void setCapteurUTv(bool value);
+
 private:
     QSharedMemory *shm;
-    T_CAPTEURS *capt;
+    T_CAPTEURS *mem;
 
 signals:
 

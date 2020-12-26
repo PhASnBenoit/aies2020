@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     cadafruit_sgp30.cpp \
     cthreadcapteurs.cpp \
     ccapteurgazfumeemq_2.cpp \
-    csharedmemory.cpp
+    csharedmemory.cpp \
+    cutv.cpp
 
 HEADERS  += \
     cbdd.h \
@@ -48,7 +49,8 @@ HEADERS  += \
     cadafruit_sgp30.h \
     cthreadcapteurs.h \
     ccapteurgazfumeemq_2.h \
-    csharedmemory.h
+    csharedmemory.h \
+    cutv.h
 
 FORMS    += \
     cihm.ui

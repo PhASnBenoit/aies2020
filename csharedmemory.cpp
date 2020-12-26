@@ -11,8 +11,8 @@ CSharedMemory::CSharedMemory(QObject *parent) : QObject(parent)
         if (!shm->attach())
             qDebug() << shm->errorString();
     } // if attach
-    capt = static_cast<T_CAPTEURS *>(shm->data());
-    bzero(capt, sizeof(T_CAPTEURS));
+    mem = static_cast<T_CAPTEURS *>(shm->data());
+    bzero(mem, sizeof(T_CAPTEURS));
 }
 
 CSharedMemory::~CSharedMemory()
@@ -23,113 +23,124 @@ CSharedMemory::~CSharedMemory()
 
 int CSharedMemory::getMesTVOC() const
 {
-    return capt->mesTVOC;
+    return mem->mesTVOC;
 }
 
 int CSharedMemory::getMesECO2() const
 {
-    return capt->mesECO2;
+    return mem->mesECO2;
 }
 
 int CSharedMemory::getMesRawH2() const
 {
-    return capt->mesRawH2;
+    return mem->mesRawH2;
 }
-
 
 int CSharedMemory::getMesRawEthanol() const
 {
-    return capt->mesRawEthanol;
+    return mem->mesRawEthanol;
 }
-
 
 int CSharedMemory::getMesBaselineTVOC() const
 {
-    return capt->mesBaselineTVOC;
+    return mem->mesBaselineTVOC;
 }
 
 int CSharedMemory::getMesBaselineECO2() const
 {
-    return capt->mesBaselineECO2;
+    return mem->mesBaselineECO2;
 }
 
 
 bool CSharedMemory::getCapteurGazFumee() const
 {
-    return capt->capteurGazFumee;
+    return mem->capteurGazFumee;
 }
 
 
 bool CSharedMemory::getCapteurPresence() const
 {
-    return capt->capteurPresence;
+    return mem->capteurPresence;
 }
 
 
 float CSharedMemory::getMesTemp() const
 {
-    return capt->mesTemp;
+    return mem->mesTemp;
 }
 
-void CSharedMemory::setMesTVOC(int val) const
+bool CSharedMemory::getCapteurUTv() const
+{
+    return mem->capteurUTv;
+}
+///////////////////////////////////////////////
+void CSharedMemory::setMesTVOC(int val)
 {
     shm->lock();
-    capt->mesTVOC = val;
+    mem->mesTVOC = val;
     shm->unlock();
 }
 
-void CSharedMemory::setMesECO2(int val) const
+void CSharedMemory::setMesECO2(int val)
 {
     shm->lock();
-    capt->mesECO2 = val;
+    mem->mesECO2 = val;
     shm->unlock();
 }
 
-void CSharedMemory::setMesRawH2(int val) const
+void CSharedMemory::setMesRawH2(int val)
 {
     shm->lock();
-    capt->mesRawH2 = val;
+    mem->mesRawH2 = val;
     shm->unlock();
 }
 
-void CSharedMemory::setMesRawEthanol(int val) const
+void CSharedMemory::setMesRawEthanol(int val)
 {
     shm->lock();
-    capt->mesRawEthanol = val;
+    mem->mesRawEthanol = val;
     shm->unlock();
 }
 
-void CSharedMemory::setMesBaselineTVOC(int val) const
+void CSharedMemory::setMesBaselineTVOC(int val)
 {
     shm->lock();
-    capt->mesBaselineTVOC = val;
+    mem->mesBaselineTVOC = val;
     shm->unlock();
 }
 
-void CSharedMemory::setMesBaselineECO2(int val) const
+void CSharedMemory::setMesBaselineECO2(int val)
 {
     shm->lock();
-    capt->mesBaselineECO2 = val;
+    mem->mesBaselineECO2 = val;
     shm->unlock();
 }
 
-void CSharedMemory::setCapteurGazFumee(bool val) const
+void CSharedMemory::setCapteurGazFumee(bool val)
 {
     shm->lock();
-    capt->capteurGazFumee = val;
+    mem->capteurGazFumee = val;
     shm->unlock();
 }
 
-void CSharedMemory::setCapteurPresence(bool val) const
+void CSharedMemory::setCapteurPresence(bool val)
 {
     shm->lock();
-    capt->capteurPresence = val;
+    mem->capteurPresence = val;
     shm->unlock();
 }
 
-void CSharedMemory::setMesTemp(float val) const
+void CSharedMemory::setMesTemp(float val)
 {
     shm->lock();
-    capt->mesTemp = val;
+    mem->mesTemp = val;
+    shm->unlock();
+}
+
+
+void CSharedMemory::setCapteurUTv(bool value)
+{
+    shm->lock();
+    mem->capteurUTv = value;
     shm->unlock();
 }

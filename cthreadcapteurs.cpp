@@ -10,6 +10,7 @@ CThreadCapteurs::CThreadCapteurs(QObject *parent) : QObject(parent)
     captPres = new CCapteurPres(this);
     captTemp = new CCapteurTemp();
     captFumee = new CCapteurGazFumeeMQ_2(this);
+    utv = new CUTv();
     captQa = new CAdafruit_SGP30();
     captQa->begin();
     qDebug() << "[CThreadCapteurs::CThreadCapteurs] Thread lancé";
@@ -21,6 +22,7 @@ CThreadCapteurs::~CThreadCapteurs()
     delete captTemp;
     delete captFumee;
     delete captQa;
+    delete utv;
     delete tmr;
     delete shm;
 }
@@ -35,6 +37,8 @@ void CThreadCapteurs::on_timeout()
     if ( (val<-99) || (val>99))
         val = -99.9f;
     shm->setMesTemp(val);
+    // U TV
+    shm->setCapteurUTv(utv->getU());
     // Présence
     shm->setCapteurPresence(captPres->getPresence());
     // fumée

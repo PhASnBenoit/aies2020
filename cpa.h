@@ -16,6 +16,7 @@
 #include "cir.h"
 #include "cecran.h"
 #include "cthreadcapteurs.h"
+#include "csharedmemory.h"
 
 // Consignes des ordres ECRAN
 #define ALLUMER 1
@@ -55,20 +56,17 @@ public:
     bool switchOffTv();
     bool switchOnLed();
     bool switchOffLed();
-    //bool getPresence();
-    //float getTemperature();
     void calculateSDPlace();
     QByteArray getSDPlace();
     void creationCache();
     bool getConsigne() const;
     void setConsigne(bool consigne);
-    //QString getQSerialNumber();  // qualité de l'air
-    //QString getQuality(QString choix);
     CEcran *ecran;
 
 private:
     CIr *emIr;
     CLed *led;
+    CSharedMemory *shm;
     QString mZone;
     QString mNom;
     QString mModeFonc;
