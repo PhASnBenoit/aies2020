@@ -15,9 +15,8 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     th.start();    // lance l'execution du thread
     emit sigGo();  // lance la lecture des capteurs dans le thread
 
-    mConsigne = ALLUMER;
     mOrdrePassed=false;
-    mEtatReelTele = shm->getCapteurUTv();
+    setEtatReelTv(shm->getCapteurUTv());
     mBdd = bdd;
     mMac = getSysMacAddress();
     mNom = bdd->getNomPa(mMac);
@@ -27,7 +26,8 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     mTimerU = new QTimer(this); // timer de vérif de la présence tension.
     mTimerU->setInterval(30000);  // 30s
     connect(mTimerU, &QTimer::timeout, this, &CPa::onTimerU);
-    mTimerU->start();
+    mTimerU->start();  // inutile car lancé par switchontv() ligne suivante
+    switchOnTv();
 }
 
 CPa::~CPa()
@@ -61,15 +61,16 @@ bool CPa::getConsigne() const
 void CPa::setConsigne(bool consigne)
 {
     mConsigne = consigne;
+    emit sigPaConsigne((mConsigne?"C-ON":"C-OFF"));
 }
+
 /*
 QString CPa::getQSerialNumber()
 {
     return QString::number(mSgp30.serialnumber[0],16)+QString::number(mSgp30.serialnumber[1],16)+QString::number(mSgp30.serialnumber[2],16);
 }
-
-
 */
+
 QString CPa::getZone()
 {
     return mZone;
@@ -136,11 +137,11 @@ void CPa::switchDiffToPerma()
 void CPa::onTimerU()
 {
     mOrdrePassed=false;
-    qDebug() << "[CPa::onTimerU] mEtatReelTele:"<<shm->getCapteurUTv()
+    qDebug() << "---[CPa::onTimerU] Etat Reel Tele:"<<shm->getCapteurUTv()
              << " mConsigne:"<< mConsigne;
     if (shm->getCapteurUTv() != mConsigne) { // si au bout de 30s l'ordre est toujours pas exécuté
         qDebug() << "[CPa::onTimerU]: Relance ordre TV !";
-        if  (mConsigne == ALLUMER)
+        if  (getConsigne() == ALLUMER)
             switchOnTv();
         else // ETEINDRE:
             switchOffTv();
@@ -149,24 +150,25 @@ void CPa::onTimerU()
 
 bool CPa::switchOnTv()
 {
-     QString ctrl=getCtrlTv();
-     mConsigne=ALLUMER;
+     setConsigne(ALLUMER);
+qDebug() << "[CPa::switchOnTv] Entrée !";
 
      if (!mOrdrePassed && !shm->getCapteurUTv()) {
          mOrdrePassed=true;
+         QString ctrl=getCtrlTv();
          if(ctrl == "cec") {
             ecran->putOnCec();
-            emit sigPaConsigne("CEC_On");
+            emit sigPaOrdre("O:CEC-On");
             qDebug() << "[CPa::switchOnTv]: On par CEC";
          }
          if(ctrl == "ir") {
              emIr->irOnOff();
-             emit sigPaConsigne("IR_On");
+             emit sigPaOrdre("O:IR-On");
              qDebug() << "[CPa::switchOnTv]: On par IR";
          }
          if(ctrl == "rs") {
              ecran->putOnRs();
-             emit sigPaConsigne("RS_On");
+             emit sigPaOrdre("O:RS-On");
              qDebug() << "[CPa::switchOnTv]: On par RS";
          } //if rs
          mTimerU->start();
@@ -176,25 +178,26 @@ bool CPa::switchOnTv()
 
 bool CPa::switchOffTv()
 {
-    QString ctrl=getCtrlTv();
-    mConsigne = ETEINDRE;
+    setConsigne(ETEINDRE);
+qDebug() << "[CPa::switchOffTv] Ordre demandé !";
 
     if (!mOrdrePassed && shm->getCapteurUTv()) {  // PhA 12/2020
         mOrdrePassed=true;
+        QString ctrl=getCtrlTv();
         if(ctrl == "cec") {
             ecran->putOffCec();
-            emit sigPaConsigne("CEC_Off");
-            qDebug() << "[CPa::switchOffTv]: Off par CEC";
+            emit sigPaOrdre("O:CEC-Off");
+qDebug() << "[CPa::switchOffTv]: Off par CEC";
         }
         if(ctrl == "ir") {
             emIr->irOnOff();
-            emit sigPaConsigne("IR_Off");  // pour affichage
-            qDebug() << "[CPa::switchOffTv]: Off par IR";
+            emit sigPaConsigne("O:IR-Off");  // pour affichage
+qDebug() << "[CPa::switchOffTv]: Off par IR";
         }
         if(ctrl == "rs") {
             ecran->putOffRs();
-            emit sigPaConsigne("RS_Off");
-            qDebug() << "[CPa::switchOffTv]: Off par RS";
+            emit sigPaOrdre("O:RS-Off");
+qDebug() << "[CPa::switchOffTv]: Off par RS";
         }
         mTimerU->start();
     } // if m_etatOrdre
@@ -240,8 +243,7 @@ bool CPa::isItTheMomentToStop()
     QString hStop = getHstop();
     QDateTime qhStop = QDateTime::fromString(hStop,"hh:mm");
 
-    //qDebug() << "CPa::isTheMomentToStop : mEtatTele :" << mEtatTele;
-    if((dateTime.toString("hh:mm") == qhStop.toString("hh:mm")) && (mEtatReelTele)) {
+    if((dateTime.toString("hh:mm") == qhStop.toString("hh:mm")) && (getEtatReelTv())) {
         return true;
     }
     return false;
@@ -249,12 +251,15 @@ bool CPa::isItTheMomentToStop()
 
 bool CPa::getEtatReelTv()
 {
+    setEtatReelTv(shm->getCapteurUTv());
     return mEtatReelTele;
 }
 
 void CPa::setEtatReelTv(bool state)
 {
     mEtatReelTele = state;
+    emit sigPaEtatReelTv((mEtatReelTele?"TV-ON":"TV-OFF"));
+
 }
 
 void CPa::setIdleTime(int idleTime)
@@ -296,8 +301,7 @@ QByteArray CPa::getSDPlace()
 
 int CPa::getUrgency()
 {
-    int mUrgency = mBdd->getUrgencyState();
-    return mUrgency;
+     return mBdd->getUrgencyState();
 }
 
 void CPa::creationCache()

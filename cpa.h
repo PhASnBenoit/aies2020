@@ -63,6 +63,7 @@ public:
     void setConsigne(bool consigne);
     CEcran *ecran;
 
+
 private:
     CIr *emIr;
     CLed *led;
@@ -81,18 +82,21 @@ private:
     QString mDateIs;
     int mIdleTime;
     bool mEtatReelTele;
-    QString getSysMacAddress();
     CBdd *mBdd;
     QTimer *mTimerU;
     bool mConsigne;
+    bool mOrdre;
     bool mOrdrePassed;
     QByteArray mSDPlace;
     QThread th;
     CThreadCapteurs *thCapt;
+    QString getSysMacAddress();
 
 signals:
     void sigPresence(int st);
     void sigPaConsigne(QString mess);
+    void sigPaOrdre(QString mess);
+    void sigPaEtatReelTv(QString mess);
     void sigQAir(QString mess);
     void sigGo();
 

@@ -448,9 +448,9 @@
    <widget class="QLabel" name="lConsigne">
     <property name="geometry">
      <rect>
-      <x>257</x>
+      <x>290</x>
       <y>970</y>
-      <width>91</width>
+      <width>61</width>
       <height>21</height>
      </rect>
     </property>
@@ -509,6 +509,22 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QLabel" name="lOrdre">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>1000</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>NC</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
    <zorder>lbHeure</zorder>
    <zorder>lbPoints</zorder>
    <zorder>lbTemp_2</zorder>
@@ -528,6 +544,7 @@
    <zorder>lConsigne</zorder>
    <zorder>lQa</zorder>
    <zorder>lFumee</zorder>
+   <zorder>lOrdre</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

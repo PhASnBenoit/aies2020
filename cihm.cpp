@@ -21,6 +21,8 @@ CIhm::CIhm(QWidget *parent) :
     pa = new CPa(this, bdd); // lance aussi le thread capteurs
     connect(pa, &CPa::sigPresence, this, &CIhm::onSigPresence); // aff * presence
     connect(pa, &CPa::sigPaConsigne, this, &CIhm::onSigPaConsigne);  // aff on/off tv
+    connect(pa, &CPa::sigPaOrdre, this, &CIhm::onSigPaOrdre);  // aff on/off tv
+    connect(pa, &CPa::sigPaEtatReelTv, this, &CIhm::onSigPaEtatReelTv);  // aff on/off tv
     connect(pa, &CPa::sigQAir, this, &CIhm::onSigQAir);  // aff serial numb Q air
 
     mPresence = shm->getCapteurPresence();
@@ -37,8 +39,6 @@ CIhm::CIhm(QWidget *parent) :
     ui->lZone->setText(pa->getZone());
     ui->lVersion->setText(mVer);
     ui->lLogoPres->setPixmap(logoPath1);
-    ui->lConsigne->setText((pa->getConsigne()?"C-ON":"C-OFF"));
-    ui->lTvState->setText((pa->getEtatReelTv()?"TV-ON":"TV-OFF"));
 
     // timer surveillance capacité de la SD
     timerCapaSd = new QTimer();
@@ -57,12 +57,14 @@ CIhm::CIhm(QWidget *parent) :
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerAff); // affichages
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
 
-    // Timer d'intervale d'absence
+    pa->switchOnTv();  // ALLUME LA TV
     QString modeFonc = pa->getModeFonc();
+    ui->lModeFonc->setText(modeFonc);
+    ui->lType->setText(pa->getCtrlTv());
     if( modeFonc == "presence")
     {
         connect(timer, &QTimer::timeout, this, &CIhm::onTimerCapteurPresence); // toutes les sec
-        timerNonPresence = new QTimer(this);
+        timerNonPresence = new QTimer(this);     // Timer d'intervale d'absence
         int duree = pa->getIdleTime();
         timerNonPresence->setInterval(duree);
         connect(timerNonPresence, &QTimer::timeout, this, &CIhm::onTimerNonPresence);
@@ -73,11 +75,6 @@ CIhm::CIhm(QWidget *parent) :
     timer->start(1000); // Timer général 1s
     timerCapaSd->start(300000);  // 5mn
 
-    // affichage mode fonc et type commande écran
-    ui->lModeFonc->setText(modeFonc);
-    ui->lType->setText(pa->getCtrlTv());
-    pa->switchOnTv();  // ALLUME LA TV
-qDebug() << "[CIhm::CIhm] allume la TV";
     //Initialisation Première Slide
     ui->webViewStarter->page()->settings()->setObjectCacheCapacities(0,0,0); // suppression cache
     mCompteurSlide = 0;
@@ -320,6 +317,16 @@ void CIhm::onSigPresence(int st)
 void CIhm::onSigPaConsigne(QString mess)
 {
     ui->lConsigne->setText(mess);
+}
+
+void CIhm::onSigPaOrdre(QString mess)
+{
+    ui->lOrdre->setText(mess);
+}
+
+void CIhm::onSigPaEtatReelTv(QString mess)
+{
+    ui->lTvState->setText(mess);
 }
 
 void CIhm::onSigQAir(QString mess)

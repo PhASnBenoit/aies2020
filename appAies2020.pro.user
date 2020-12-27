@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.8.2, 2020-12-26T01:07:36. -->
+<!-- Written by QtCreator 4.8.2, 2020-12-27T18:00:32. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -305,7 +305,8 @@
     <value type="bool" key="RunConfiguration.UseMultiProcess">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory"></value>
+    <value type="bool" key="RunConfiguration.UseTerminal">false</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory">/opt/aies</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/pi/devQt/build-appAies2020-Desktop-Debug</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>

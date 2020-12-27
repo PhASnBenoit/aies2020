@@ -74,6 +74,8 @@ private slots:
     void onTimerOupsSlide();
     void onSigPresence(int st);
     void onSigPaConsigne(QString mess);
+    void onSigPaOrdre(QString mess);
+    void onSigPaEtatReelTv(QString mess);
     void onSigQAir(QString mess);
 };
 
