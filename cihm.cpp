@@ -151,27 +151,27 @@ void CIhm::affQuality(QString choix)
     if(choix=="tous")
         switch(cpt) {
         case 10:case 11:case 12:case 13:case 14:
-             ui->lQa->setText("TVOC:"+QString::number(shm->getMesTVOC())+
+             ui->lQa->setText("QAir TVOC:"+QString::number(shm->getMesTVOC())+
                               " eCO2:"+QString::number(shm->getMesECO2()));
             break;
         case 15:case 16:case 17:case 18:case 19:case 20:
             if (cpt==20) cpt = 0;
-            ui->lQa->setText("H2:"+QString::number(shm->getMesRawH2())+
+            ui->lQa->setText("Raw H2:"+QString::number(shm->getMesRawH2())+
                              " Eth:"+QString::number(shm->getMesRawEthanol()));
             break;
         default:
-            ui->lQa->setText("TVOC:"+QString::number(shm->getMesBaselineTVOC())+
+            ui->lQa->setText("Comp TVOC:"+QString::number(shm->getMesBaselineTVOC())+
                              " eCO2:"+QString::number(shm->getMesBaselineECO2()));
             break;
         } // sw
     if(choix=="sig")
-        ui->lQa->setText("TVOC:"+QString::number(shm->getMesTVOC())+
+        ui->lQa->setText("QAir TVOC:"+QString::number(shm->getMesTVOC())+
                          " eCO2:"+QString::number(shm->getMesECO2()));
     if(choix=="raw")
-        ui->lQa->setText("H2:"+QString::number(shm->getMesRawH2())+
+        ui->lQa->setText("Raw H2:"+QString::number(shm->getMesRawH2())+
                          " Eth:"+QString::number(shm->getMesRawEthanol()));
     if(choix=="base")
-        ui->lQa->setText("TVOC:"+QString::number(shm->getMesBaselineTVOC())+
+        ui->lQa->setText("BL TVOC:"+QString::number(shm->getMesBaselineTVOC())+
                          " eCO2:"+QString::number(shm->getMesBaselineECO2()));
 }
 

@@ -320,7 +320,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>1030</y>
+      <y>1000</y>
       <width>41</width>
       <height>21</height>
      </rect>
@@ -388,7 +388,7 @@
    <widget class="QLabel" name="lLogoIr">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>310</x>
       <y>1030</y>
       <width>16</width>
       <height>21</height>
@@ -422,27 +422,27 @@
    <widget class="QLabel" name="lModeFonc">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>1030</y>
-      <width>161</width>
+      <x>140</x>
+      <y>1000</y>
+      <width>131</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>NC</string>
+     <string>lModeFonc</string>
     </property>
    </widget>
    <widget class="QLabel" name="lType">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>1030</y>
+      <x>60</x>
+      <y>1000</y>
       <width>81</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>NC</string>
+     <string>lType</string>
     </property>
    </widget>
    <widget class="QLabel" name="lConsigne">
@@ -455,7 +455,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>NC</string>
+     <string>lCons</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -465,8 +465,8 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>1000</y>
-      <width>261</width>
+      <y>1030</y>
+      <width>271</width>
       <height>22</height>
      </rect>
     </property>
@@ -512,14 +512,14 @@
    <widget class="QLabel" name="lOrdre">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>270</x>
       <y>1000</y>
-      <width>61</width>
+      <width>81</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>NC</string>
+     <string>lOrdre</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
