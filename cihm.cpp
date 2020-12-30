@@ -53,7 +53,6 @@ CIhm::CIhm(QWidget *parent) :
     // Timer général
     timer = new QTimer();
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerFlash);  // affichage de l'info flash
-    connect(timer, &QTimer::timeout, this, &CIhm::onTimerBdd); // sauve temp, presence, capcite SD dans bdd
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerAff); // affichages
     connect(timer, &QTimer::timeout, this, &CIhm::onTimerUpdate); // mise à jour du logiciel
 
@@ -194,16 +193,6 @@ void CIhm::onTimerOpenHour()  // seulement si mode heure depart et fin
 //        qDebug() << "Mode heure dep/arr : Arrêt de la TV.";
         pa->switchOffTv();
     }
-}
-
-// Ecrire les données capteurs dans la Bdd
-void CIhm::onTimerBdd()  // toutes les secs
-{
-    bool u=shm->getCapteurUTv();
-    mTemp = shm->getMesTemp();
-    QString realtemp = QString::number(static_cast<double>(mTemp),'f',1);
-    QByteArray pourcentage = pa->getSDPlace();
-    bdd->setCapteurs(realtemp, pourcentage, (u?"O":"N"), mac);
 }
 
 void CIhm::getSlide()

@@ -83,7 +83,8 @@ private:
     int mIdleTime;
     bool mEtatReelTele;
     CBdd *mBdd;
-    QTimer *mTimerU;
+    QTimer *mTimerU; // toutes les 30s
+    QTimer *mTimer;  // toutes les s
     bool mConsigne;
     bool mOrdre;
     bool mOrdrePassed;
@@ -102,6 +103,7 @@ signals:
 
 private slots:
     void onTimerU();
+    void onTimerBdd();
 };
 
 #endif // CPA_H

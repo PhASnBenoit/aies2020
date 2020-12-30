@@ -41,7 +41,7 @@ public:
     int getIdleTime(QString mac);
 
     //mutateur bdd
-    void setCapteurs(QString temp, QByteArray sd, QString pres, QString mac);
+    void setCapteurs(QString temp, QString co2, QString cov, QString pres, QByteArray sd, QString mac);
     void setSliderUpdate(QDateTime dateActu);
     void writeBdd(QString query);
     void switchDiffToPerma();

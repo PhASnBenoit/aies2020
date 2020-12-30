@@ -56,7 +56,6 @@ private:
     int idEnCours;
     int idFEnCours;
     int mCompteurSlide;
-    float mTemp;
     bool mPresence;
     void getSlide();
     void affSlide();
@@ -67,7 +66,6 @@ private slots:
     void onTimerAff();
     void onTimerNonPresence();
     void onTimerOpenHour();
-    void onTimerBdd();
     void onTimerUpdate();
     void onTimerSlide();
     void onTimerFlash();

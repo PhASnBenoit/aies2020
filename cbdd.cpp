@@ -337,7 +337,7 @@ QString CBdd::getActiveFlash()
     return strFlash;
 }
 
-void CBdd::setCapteurs(QString temp, QByteArray sd, QString pres, QString mac)
+void CBdd::setCapteurs(QString temp, QString co2, QString cov, QString pres, QByteArray sd,QString mac)
 {
     if(!Aies_bdd.isOpen())
     {
@@ -345,7 +345,9 @@ void CBdd::setCapteurs(QString temp, QByteArray sd, QString pres, QString mac)
     }
     else
     {
-        QSqlQuery Aies_query("UPDATE pas SET temp='"+temp+"', Pourcentage_SD ='"+sd+"', presence='"+pres+"' WHERE mac='"+mac+"';");
+        QSqlQuery Aies_query("UPDATE pas SET temp='"+temp+"', CO2='"+co2+
+                             "', COV='"+cov+"', Pourcentage_SD ='"+sd+
+                             "', presence='"+pres+"' WHERE mac='"+mac+"';");
     }
 }
 

@@ -8,6 +8,8 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     emIr = new CIr(this);
     shm = new CSharedMemory();
 
+    // Thread d'interrogation cyclique des capteurs
+    // toutes les s par timer interne
     thCapt = new CThreadCapteurs();
     thCapt->moveToThread(&th);
     connect(&th, &QThread::finished, thCapt, &CThreadCapteurs::deleteLater);
@@ -23,6 +25,11 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     mZone = bdd->getNomZone(bdd->getNoZone(mMac).toInt()); // Tester simplement bdd->getNoZone(mac)
     mIdleTime = bdd->getIdleTime(mMac);
 
+    mTimer =  new QTimer(this); // Timer sauve capteurs vers BDD
+    mTimer->setInterval(5000);  //
+    connect(mTimer, &QTimer::timeout, this, &CPa::onTimerBdd);
+    mTimer->start();
+
     mTimerU = new QTimer(this); // timer de vérif de la présence tension.
     mTimerU->setInterval(30000);  // 30s
     connect(mTimerU, &QTimer::timeout, this, &CPa::onTimerU);
@@ -34,6 +41,7 @@ CPa::~CPa()
 {
     th.quit();
     th.wait();
+    delete mTimer;
     delete mTimerU;
     delete ecran;
     delete led;
@@ -146,6 +154,17 @@ void CPa::onTimerU()
         else // ETEINDRE:
             switchOffTv();
     } // if != consigne
+}
+
+void CPa::onTimerBdd()
+{
+    bool u=shm->getCapteurUTv();
+    QString co2 = QString::number(shm->getMesECO2());
+    QString cov = QString::number(shm->getMesTVOC());
+    float temp = shm->getMesTemp();
+    QString realtemp = QString::number(static_cast<double>(temp),'f',1);
+    QByteArray pourcentage = getSDPlace();
+    mBdd->setCapteurs(realtemp,co2, cov, (u?"O":"N"), pourcentage, mMac);
 }
 
 bool CPa::switchOnTv()
