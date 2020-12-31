@@ -15,11 +15,11 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     mNom = mBdd->getNomPa(mMac);
     mZone = mBdd->getNomZone(mBdd->getNoZone(mMac).toInt()); // Tester simplement bdd->getNoZone(mac)
     mIdleTime = mBdd->getIdleTime(mMac);
-    pc = mBdd->getPresCapteurs(mMac);
-
+    _pc = mBdd->getPresCapteurs(mMac);
+qDebug() << "[CPa::CPa] _pc : " << _pc;
     // Thread d'interrogation cyclique des capteurs
     // toutes les s par timer interne
-    thCapt = new CThreadCapteurs(pc);
+    thCapt = new CThreadCapteurs(_pc);
     thCapt->moveToThread(&th);
     connect(&th, &QThread::finished, thCapt, &CThreadCapteurs::deleteLater);
     connect(this, &CPa::sigGo, thCapt, &CThreadCapteurs::go);

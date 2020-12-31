@@ -88,7 +88,7 @@ private:
     bool mOrdre;
     bool mOrdrePassed;
     QByteArray mSDPlace;
-    QByteArray pc; // présence des capteurs
+    QByteArray _pc; // présence des capteurs
     QThread th;
     CThreadCapteurs *thCapt;
     QString getSysMacAddress();
