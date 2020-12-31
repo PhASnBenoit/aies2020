@@ -63,7 +63,6 @@ public:
     void setConsigne(bool consigne);
     CEcran *ecran;
 
-
 private:
     CIr *emIr;
     CLed *led;
@@ -89,6 +88,7 @@ private:
     bool mOrdre;
     bool mOrdrePassed;
     QByteArray mSDPlace;
+    QByteArray pc; // présence des capteurs
     QThread th;
     CThreadCapteurs *thCapt;
     QString getSysMacAddress();

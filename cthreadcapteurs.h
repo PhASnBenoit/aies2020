@@ -16,11 +16,12 @@ class CThreadCapteurs : public QObject
 {
     Q_OBJECT
 public:
-    explicit CThreadCapteurs(QObject *parent = nullptr);
+    explicit CThreadCapteurs(QByteArray pc = "", QObject *parent = nullptr);
     ~CThreadCapteurs();
 
 private:
     CSharedMemory *shm;
+    QByteArray _pc;
     QTimer *tmr;
     CCapteurPres *captPres;
     CCapteurTemp *captTemp;

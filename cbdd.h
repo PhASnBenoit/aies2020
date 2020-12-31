@@ -36,7 +36,7 @@ public:
     QList<QList<QString> > getActiveSlides(QString mac);
     QString getActiveFlash();
     QList<QString>  getImagesVideos(QString mac);
-
+    QByteArray getPresCapteurs(QString mac);
     //QString getListePages(int zone);
     int getIdleTime(QString mac);
 

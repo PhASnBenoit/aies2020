@@ -363,47 +363,66 @@ void CBdd::writeBdd(QString query)
 
 int CBdd::getUrgencyState()
 {
-     if(!Aies_bdd.isOpen())
-    {
+    if(!Aies_bdd.isOpen()) {
         qDebug("[CBdd::getUrgencyState]: BDD non ouverte"); //verification d'accès à la bdd
         exit(1);
-    }
-
-     else
-     {
+    } else {
          int urgencyIsOn = 0;
          QSqlQuery Aies_query("SELECT isOn FROM urgency"); //prend la valeur dans la BDD
          Aies_query.next();
          urgencyIsOn = Aies_query.value(0).toBool(); //transforme la valeur en bool
          //qDebug() << "[CBdd::getUrgencyState] Urgency: " << urgencyIsOn;
          return urgencyIsOn;
-     }
+    } // else
 }
 
 QList<QString> CBdd::getImagesVideos(QString mac) {
-    bool newData = false;
-    QString req = "SELECT pathimg, date_create FROM slidezone WHERE state = 'actif' AND (zone=0 OR zone="+getNoZone(mac)+") AND pathimg IS NOT NULL";
-    QSqlQuery Aies_query(req); // envoie de la requête à la BDD
     QList<QString> videoSlide;
+    if(!Aies_bdd.isOpen()) {
+        qDebug("[CBdd::getImagesVideos]: BDD non ouverte"); //verification d'accès à la bdd
+        exit(1);
+    } else {
+        bool newData = false;
+        QString req = "SELECT pathimg, date_create FROM slidezone WHERE state = 'actif' AND (zone=0 OR zone="+getNoZone(mac)+") " +
+                      "AND pathimg IS NOT NULL";
+        QSqlQuery Aies_query(req); // envoie de la requête à la BDD
 
-    qDebug() << "[CBdd::getImagesVideos] obtention liste des images/vidéos " << req << " Nombre : " << Aies_query.size();
-    while(Aies_query.next()) // la requête nous renvoie un resultat
-    {
-        newData = true;
-        QString tempQList;
-        tempQList.append(Aies_query.value(0).toString()); //on met les diapos dans une liste
-        qDebug() << "[CBdd::getImagesVideos] Mise en liste de :" << Aies_query.value(0).toString();
-        videoSlide.append(tempQList);
-    } // wh
+        qDebug() << "[CBdd::getImagesVideos] obtention liste des images/vidéos " << req << " Nombre : " << Aies_query.size();
+        while(Aies_query.next()) // la requête nous renvoie un resultat
+        {
+            newData = true;
+            QString tempQList;
+            tempQList.append(Aies_query.value(0).toString()); //on met les diapos dans une liste
+            qDebug() << "[CBdd::getImagesVideos] Mise en liste de :" << Aies_query.value(0).toString();
+            videoSlide.append(tempQList);
+        } // wh
 
-    if(newData == false) //aucune diapositive ne correspond a la requette
-    {
-        QString tempQList;
-        tempQList.append("none");
-        videoSlide.append(tempQList);
-    } // if newdata
-
+        if(newData == false) //aucune diapositive ne correspond à la requête
+        {
+            QString tempQList;
+            tempQList.append("none");
+            videoSlide.append(tempQList);
+        } // if newdata
+    } // else
     return videoSlide;
+}
+
+QByteArray CBdd::getPresCapteurs(QString mac)
+{
+    QByteArray cs;
+    if(!Aies_bdd.isOpen()) {
+        qDebug("[CBdd::getPresCapteurs]: BDD non ouverte"); //verification d'accès à la bdd
+        exit(1);
+    } else {
+        QString req = "SELECT captPres, captQAir, captTemp, captFumee FROM pas WHERE mac="+mac+")";
+        QSqlQuery Aies_query(req); // envoie de la requête à la BDD
+        Aies_query.next();
+        cs.append(Aies_query.value("captPres").toBool());
+        cs.append(Aies_query.value("captQAir").toBool());
+        cs.append(Aies_query.value("captTemp").toBool());
+        cs.append(Aies_query.value("captFumee").toBool());
+    } // else
+    return cs;
 } // creationCacheVideo
 
 /*

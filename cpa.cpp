@@ -8,25 +8,26 @@ CPa::CPa(QObject *parent, CBdd *bdd):
     emIr = new CIr(this);
     shm = new CSharedMemory();
 
+    mOrdrePassed=false;
+    setEtatReelTv(shm->getCapteurUTv());
+    mBdd = bdd;
+    mMac = getSysMacAddress();
+    mNom = mBdd->getNomPa(mMac);
+    mZone = mBdd->getNomZone(mBdd->getNoZone(mMac).toInt()); // Tester simplement bdd->getNoZone(mac)
+    mIdleTime = mBdd->getIdleTime(mMac);
+    pc = mBdd->getPresCapteurs(mMac);
+
     // Thread d'interrogation cyclique des capteurs
     // toutes les s par timer interne
-    thCapt = new CThreadCapteurs();
+    thCapt = new CThreadCapteurs(pc);
     thCapt->moveToThread(&th);
     connect(&th, &QThread::finished, thCapt, &CThreadCapteurs::deleteLater);
     connect(this, &CPa::sigGo, thCapt, &CThreadCapteurs::go);
     th.start();    // lance l'execution du thread
     emit sigGo();  // lance la lecture des capteurs dans le thread
 
-    mOrdrePassed=false;
-    setEtatReelTv(shm->getCapteurUTv());
-    mBdd = bdd;
-    mMac = getSysMacAddress();
-    mNom = bdd->getNomPa(mMac);
-    mZone = bdd->getNomZone(bdd->getNoZone(mMac).toInt()); // Tester simplement bdd->getNoZone(mac)
-    mIdleTime = bdd->getIdleTime(mMac);
-
     mTimer =  new QTimer(this); // Timer sauve capteurs vers BDD
-    mTimer->setInterval(5000);  //
+    mTimer->setInterval(5000);  // 5s
     connect(mTimer, &QTimer::timeout, this, &CPa::onTimerBdd);
     mTimer->start();
 
@@ -69,15 +70,8 @@ bool CPa::getConsigne() const
 void CPa::setConsigne(bool consigne)
 {
     mConsigne = consigne;
-    emit sigPaConsigne((mConsigne?"C-ON":"C-OFF"));
+    emit sigPaConsigne((mConsigne?"C:ON":"C:OFF"));
 }
-
-/*
-QString CPa::getQSerialNumber()
-{
-    return QString::number(mSgp30.serialnumber[0],16)+QString::number(mSgp30.serialnumber[1],16)+QString::number(mSgp30.serialnumber[2],16);
-}
-*/
 
 QString CPa::getZone()
 {
