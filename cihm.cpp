@@ -198,11 +198,24 @@ void CIhm::onTimerOpenHour()  // seulement si mode heure depart et fin
 
 void CIhm::getSlide()
 {
+    QString docs = conf->getHtDocs();
+
     qDebug() << endl << "CIhmAppAies2020::getSlide() : On recommence.";
     pa->calculateSDPlace();
     pa->creationCache();
     bdd->setSliderUpdate(pa->getDateTime()); // met à jour le champ state à actif ou arch pour tous les PA
+    mPrior = false;
     mTabSlides = bdd->getActiveSlides(mac); // uniquement celles pour le PA
+    // recherhce de la diapo prioritaire
+    for (int i=0 ; i<mTabSlides.size() ; i++) {
+        if (mTabSlides.at(i).at(3) == "yes") { // si diapo prioritaire
+            mPriorSlide.setUrl("http://" + mServeur + docs + mTabSlides.at(i).at(1));// by PhA 2019-01-31
+            mPriorSwap=true;
+            mPrior=true;
+            mPriorTime=mTabSlides.at(i).at(2).toInt();
+            break;
+        } // if
+    } // for i
     qDebug() << "CIhm::getSlide Nbe de diapo : " << mTabSlides.size();
     //mUrgencyState = pa->getUrgency();
     affSlide();
@@ -220,15 +233,9 @@ void CIhm::affSlide()
        timerOupsSlide->start(10000); //
     } else {
         if(mTabSlides.at(0).at(0) != "none") {
-            if (timerOupsSlide->isActive()) timerOupsSlide->stop();
+            if (timerOupsSlide->isActive())
+                timerOupsSlide->stop();
             if(mCompteurSlide < mTabSlides.size()) {
-                if (mTabSlides.at(mCompteurSlide).at(3) == "yes") { // si diapo prioritaire
-                    mPriorSlide.setUrl("http://" + mServeur + docs + mTabSlides.at(mCompteurSlide).at(1));// by PhA 2019-01-31
-                    mPriorSwap=true;
-                    mPrior=true;
-                    mPriorTime=mTabSlides.at(mCompteurSlide).at(2).toInt();
-                    mCompteurSlide++; // j'ai des doutes ! PhA 20201217
-                } // if
                 if (mPriorSwap && mPrior) { // aff de la prioritaire si existe
                     qDebug() << mPriorSlide.url();
                     ui->webViewStarter->load(mPriorSlide);
