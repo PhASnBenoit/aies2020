@@ -147,22 +147,22 @@ void CIhm::affQuality(QString choix)
 {
     static int cpt=0;
     cpt++;
-    if(choix=="tous")
+    if(choix=="tous") {
         switch(cpt) {
-        case 10:case 11:case 12:case 13:case 14:
-             ui->lQa->setText("QAir TVOC:"+QString::number(shm->getMesTVOC())+
-                              " eCO2:"+QString::number(shm->getMesECO2()));
+        case 15:case 16:case 17:
+            ui->lQa->setText("Comp TVOC:"+QString::number(shm->getMesBaselineTVOC())+
+                             " eCO2:"+QString::number(shm->getMesBaselineECO2()));
             break;
-        case 15:case 16:case 17:case 18:case 19:case 20:
-            if (cpt==20) cpt = 0;
+        case 18:case 19:case 20:
             ui->lQa->setText("Raw H2:"+QString::number(shm->getMesRawH2())+
                              " Eth:"+QString::number(shm->getMesRawEthanol()));
             break;
         default:
-            ui->lQa->setText("Comp TVOC:"+QString::number(shm->getMesBaselineTVOC())+
-                             " eCO2:"+QString::number(shm->getMesBaselineECO2()));
+            ui->lQa->setText("QAir TVOC:"+QString::number(shm->getMesTVOC())+
+                             " eCO2:"+QString::number(shm->getMesECO2()));
             break;
         } // sw
+    } // if tous
     if(choix=="sig")
         ui->lQa->setText("QAir TVOC:"+QString::number(shm->getMesTVOC())+
                          " eCO2:"+QString::number(shm->getMesECO2()));
@@ -172,6 +172,7 @@ void CIhm::affQuality(QString choix)
     if(choix=="base")
         ui->lQa->setText("BL TVOC:"+QString::number(shm->getMesBaselineTVOC())+
                          " eCO2:"+QString::number(shm->getMesBaselineECO2()));
+    if (cpt==20) cpt = 0;
 }
 
 void CIhm::onTimerNonPresence()   // seulement si mode présence et personne devant depuis x mn
