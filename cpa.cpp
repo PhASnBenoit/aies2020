@@ -318,6 +318,7 @@ void CPa::creationCache()
 {
   int i =0;
   QList<QString> videoSlide = mBdd->getImagesVideos(mMac);
+  if (videoSlide.at(0)=="none") return;
   QProcess wget;
   CConfig conf;
 
