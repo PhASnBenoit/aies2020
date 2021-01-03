@@ -235,6 +235,8 @@ void CIhm::affSlide()
         if(mTabSlides.at(0).at(0) != "none") {
             if (timerOupsSlide->isActive())
                 timerOupsSlide->stop();
+            if (mTabSlides.at(mCompteurSlide).at(3) == "yes")
+                mCompteurSlide++; // pour éviter l'affichage supplémentaire de la diapo prioritaire
             if(mCompteurSlide < mTabSlides.size()) {
                 if (mPriorSwap && mPrior) { // aff de la prioritaire si existe
                     qDebug() << mPriorSlide.url();
