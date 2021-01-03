@@ -206,7 +206,7 @@ void CIhm::getSlide()
     bdd->setSliderUpdate(pa->getDateTime()); // met à jour le champ state à actif ou arch pour tous les PA
     mPrior = false;
     mTabSlides = bdd->getActiveSlides(mac); // uniquement celles pour le PA
-    // recherhce de la diapo prioritaire
+    // recherche de la diapo prioritaire
     for (int i=0 ; i<mTabSlides.size() ; i++) {
         if (mTabSlides.at(i).at(3) == "yes") { // si diapo prioritaire
             mPriorSlide.setUrl("http://" + mServeur + docs + mTabSlides.at(i).at(1));// by PhA 2019-01-31
@@ -216,7 +216,7 @@ void CIhm::getSlide()
             break;
         } // if
     } // for i
-    qDebug() << "CIhm::getSlide Nbe de diapo : " << mTabSlides.size();
+qDebug() << "[CIhm::getSlide] Nbe de diapo : " << mTabSlides.size();
     //mUrgencyState = pa->getUrgency();
     affSlide();
 }
@@ -227,7 +227,7 @@ void CIhm::affSlide()
     mUrgencyState = pa->getUrgency();
 
     if(mUrgencyState) {
-        qDebug() << "[CIhm::affSlide] FIN URGENTE DE L'AFFICHAGE";
+qDebug() << "[CIhm::affSlide] FIN URGENTE DE L'AFFICHAGE";
         QUrl url("http://" + mServeur + docs + "/rpi/slide/oups.php");
        ui->webViewStarter->load(url);
        timerOupsSlide->start(10000); //
@@ -235,17 +235,17 @@ void CIhm::affSlide()
         if(mTabSlides.at(0).at(0) != "none") {
             if (timerOupsSlide->isActive())
                 timerOupsSlide->stop();
-            if (mTabSlides.at(mCompteurSlide).at(3) == "yes")
-                mCompteurSlide++; // pour éviter l'affichage supplémentaire de la diapo prioritaire
             if(mCompteurSlide < mTabSlides.size()) {
+                if (mTabSlides.at(mCompteurSlide).at(3) == "yes")
+                    mCompteurSlide++; // pour éviter l'affichage supplémentaire de la diapo prioritaire
                 if (mPriorSwap && mPrior) { // aff de la prioritaire si existe
-                    qDebug() << mPriorSlide.url();
+qDebug() << mPriorSlide.url();
                     ui->webViewStarter->load(mPriorSlide);
                     timerSlide->start(mPriorTime);
                     mPriorSwap = false;
                 } else {
                     QUrl slideUrl("http://" + mServeur + docs + mTabSlides.at(mCompteurSlide).at(1)); // by PhA 2019-01-31
-                    qDebug() << slideUrl.url();
+qDebug() << slideUrl.url();
                     ui->webViewStarter->load(slideUrl);
                     timerSlide->start(mTabSlides.at(mCompteurSlide).at(2).toInt());
                     mPriorSwap = true;
@@ -255,13 +255,12 @@ void CIhm::affSlide()
                 mCompteurSlide = 0;
                 getSlide();
             } // else mCompteurSlide
-        }
-        else { // Pas URGENCE mais pas de diapo à afficher.
+        } else { // Pas URGENCE mais pas de diapo à afficher.
             QUrl url("http://" + mServeur + docs + "/rpi/slide/oups.php");  // by PhA 2019-01-31
             ui->webViewStarter->load(url);
             timerOupsSlide->start(10000);
-        } // else
-    }
+        } // else rien a afifcher
+    } // else urgence
 } // affSlide
 
 void CIhm::onTimerFlash()
