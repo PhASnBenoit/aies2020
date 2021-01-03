@@ -294,21 +294,18 @@ QString CPa::getMac()
 
 void CPa::calculateSDPlace()
 {
-    qDebug() << "[CPa::getSDPlace] Calcul de SD restant.";
+qDebug() << "[CPa::getSDPlace] Calcul de SD restant.";
     QProcess sh; //on crée ici sh qui est le processus qui va nous permettre de faire une commande en shell
-    //sh.setStandardOutputFile("/opt/aies/sd.txt");
     sh.start("sh", QStringList() <<  "-c" << "df / |tr -s ' ' |cut -d ' ' -f5 |head -n 2 |tail -n 1 |tr -d '%'");
-    //sh.start("sh -c df / |tr -s ' ' |cut -d ' ' -f5 | head -n 2 | tail -n 1 | tr -d '%'");
     //nous faisons ci-dessus la commande qui nous permet de récuperer seulement le pourcentage de la place restante dans la SD
-    sh.waitForFinished(); // pas besoin d'attendre, on lira le fichier produit
+    sh.waitForFinished();
     mSDPlace = sh.readAll();
-    qDebug() << "[CPa::getSDPlace] " << mSDPlace;
+qDebug() << "[CPa::getSDPlace] " << mSDPlace;
     sh.close(); //kill le processus
 } // caculateSDPlace
 
 QByteArray CPa::getSDPlace()
 {
- //qDebug() << "[CPa::getSDPlace] Lecture SD restant.";
  return mSDPlace;
 } // getSDPlace
 
@@ -321,17 +318,18 @@ void CPa::creationCache()
 {
   int i =0;
   QList<QString> videoSlide = mBdd->getImagesVideos(mMac);
-  QProcess scp;
+  QProcess wget;
   CConfig conf;
 
-  qDebug() << "Chargement du cache.";
+qDebug() << "Chargement du cache.";
   for(i=0 ; i<videoSlide.size() ; i++) {
-    QString command="scp root@"+conf.getBddHostname()+":/srv/www/htdocs"+
-            conf.getHtDocs()+videoSlide.at(i)+" /opt/aies/cache/";
-    qDebug() << "CPa::creationCache: " << command;
-    scp.startDetached(command);
+//    QString command="scp root@"+conf.getBddHostname()+":/srv/www/htdocs"+
+//            conf.getHtDocs()+videoSlide.at(i)+" /opt/aies/cache/";
+    QString command = "wget -O "+conf.getCacheDir()+videoSlide.at(i)+" "+conf.getBddHostname()+conf.getHtDocs()+videoSlide.at(i);
+qDebug() << "CPa::creationCache: " << command;
+    wget.startDetached(command);
     //ici nous utilisons la commande scp pour récupérer les vidéos stockées sur le serveur selon leur chemin d accès
     //qDebug() << "CPa::creationCache: Met en cache ress : " << videoSlide.at(i);
-    scp.close();
+    wget.close();
   } // for
 }

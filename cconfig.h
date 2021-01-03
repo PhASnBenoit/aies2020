@@ -15,6 +15,7 @@ public:
     QString getBddPassword();
     QString getNumVersion();
     QString getHtDocs();  // by PhA  2019-01-31
+    QString getCacheDir();
 private:
     QString BddType;
     QString BddHostname;
@@ -23,6 +24,7 @@ private:
     QString BddPassword;
     QString NumVersion;
     QString htDocs;
+    QString cacheDir;
 };
 
 #endif // CCONFIG_H
