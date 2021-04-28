@@ -286,7 +286,7 @@ void CIhm::onTimerUpdate()  // vérification de la maj du logiciel
         mUpdate=true;
         //lancement aies_update
         disconnect(this, SLOT(onTimerUpdate()));  // on reçoit plus les signaux MAJ
-        system("/opt/update/aies_update");
+        system("/opt/aies/aies_update");
         // prévoir éventuellement de terminer l'application
     }
 }
